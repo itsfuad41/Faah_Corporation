@@ -16,29 +16,29 @@
   <style>#pivotHeadRow th:last-child{position:sticky;right:0;z-index:5;background:#20384d}#pivotBody .monthly-total{position:sticky;right:0;z-index:2}</style>
   <style>.profile-actions{display:flex;align-items:center;gap:10px}.profile-wrap{position:relative}.profile-trigger{display:flex;align-items:center;gap:10px;padding:2px 4px;background:transparent;color:var(--text);font-weight:400;text-align:right}.profile-copy{display:grid;gap:2px;line-height:1.15}.profile-name{font-weight:600}.profile-role{font-size:11px;color:var(--muted)}.profile-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:white;font-weight:700}.profile-menu{position:absolute;right:0;top:calc(100% + 7px);z-index:30;min-width:190px;padding:5px 0;background:white;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(21,34,56,.15)}.profile-menu button{display:block;width:100%;padding:10px 14px;border-radius:0;background:white;color:var(--text);font-weight:500;text-align:left}.profile-menu button:hover{background:var(--bg);filter:none}#developerCredit{position:fixed;right:12px;bottom:8px;z-index:3;padding:4px 8px;background:rgba(255,255,255,.9);color:var(--muted);font-size:11px;pointer-events:none}@media(max-width:600px){.profile-actions{gap:5px}.profile-trigger{gap:6px;padding:2px}.profile-avatar{width:32px;height:32px;flex-basis:32px}#developerCredit{right:6px;bottom:4px}}</style>
   <style>.account-details{display:grid;gap:8px;margin:0}.account-details>div{display:grid;grid-template-columns:minmax(100px,.5fr) 1fr;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}.account-details dt{color:var(--muted);font-weight:600}.account-details dd{margin:0;overflow-wrap:anywhere}</style>
-<style>.series-quick{display:inline-flex;gap:6px;flex-wrap:wrap;vertical-align:top;margin:0 0 10px 6px}.series-quick button{padding:9px 14px}.series-quick button.blue{background:var(--blue)}.modal-box{position:relative}.modal-x{position:absolute;top:8px;right:8px;background:transparent;color:#334155;font-size:22px;line-height:1;padding:2px 9px}.modal-x:hover{background:#e2e8f0;filter:none}nav.tabs #developerCredit{position:static;margin-left:auto;padding:4px 8px;background:transparent;color:var(--navy);font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none}.selected-row td{background:#cfe3f7!important}</style>
-<style>.sheet tbody td{user-select:none;-webkit-user-select:none;cursor:cell}.sheet tbody td.cell-sel{background:#cfe3f7!important}.sheet tbody td.cell-focus{outline:2px solid #1769aa;outline-offset:-2px}#sheetToast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1a2f42;color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}#sheetToast.show{opacity:.95}</style>
-<style>
-.net-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px;animation:netBlink 1.2s ease-in-out infinite}
-.net-dot.on{background:#22c55e;box-shadow:0 0 6px 2px rgba(34,197,94,.7)}
-.net-dot.off{background:#ef4444;box-shadow:0 0 6px 2px rgba(239,68,68,.7)}
-@keyframes netBlink{50%{opacity:.25}}
-.net-spin{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-2px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:netSpin .8s linear infinite}
-@keyframes netSpin{to{transform:rotate(360deg)}}
-.sum-box{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:4px;font-weight:600}
-.sum-box b{font-size:14px}.sum-box.prod{background:#fff6d8}.sum-box.ont{background:#e3f7ee}
-.sum-filters{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:10px}
-.sum-filters .chk{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
-.ms-wrap{position:relative;display:inline-block}
-.ms-btn{background:white;color:var(--text);border:1px solid var(--line);font-weight:400;min-width:170px;text-align:left;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ms-panel{position:absolute;top:100%;left:0;margin-top:4px;background:white;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:30;width:250px;padding:8px}
-.ms-panel>input{width:100%;margin-bottom:6px}
-.ms-list{max-height:260px;overflow:auto;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
-.ms-item{display:flex;align-items:center;gap:7px;padding:4px 2px;cursor:pointer}
-.ms-item:hover{background:#eef3f8}
-.ms-all{font-weight:700}
-.ms-empty{padding:6px;color:#64748b}
-</style>
+  <style>.series-quick{display:inline-flex;gap:6px;flex-wrap:wrap;vertical-align:top;margin:0 0 10px 6px}.series-quick button{padding:9px 14px}.series-quick button.blue{background:var(--blue)}.modal-box{position:relative}.modal-x{position:absolute;top:8px;right:8px;background:transparent;color:#334155;font-size:22px;line-height:1;padding:2px 9px}.modal-x:hover{background:#e2e8f0;filter:none}nav.tabs #developerCredit{position:static;margin-left:auto;padding:4px 8px;background:transparent;color:var(--navy);font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none}.selected-row td{background:#cfe3f7!important}</style>
+  <style>.sheet tbody td{user-select:none;-webkit-user-select:none;cursor:cell}.sheet tbody td.cell-sel{background:#cfe3f7!important}.sheet tbody td.cell-focus{outline:2px solid #1769aa;outline-offset:-2px}#sheetToast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1a2f42;color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}#sheetToast.show{opacity:.95}</style>
+  <style>
+  .net-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px;animation:netBlink 1.2s ease-in-out infinite}
+  .net-dot.on{background:#22c55e;box-shadow:0 0 6px 2px rgba(34,197,94,.7)}
+  .net-dot.off{background:#ef4444;box-shadow:0 0 6px 2px rgba(239,68,68,.7)}
+  @keyframes netBlink{50%{opacity:.25}}
+  .net-spin{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-2px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:netSpin .8s linear infinite}
+  @keyframes netSpin{to{transform:rotate(360deg)}}
+  .sum-box{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:4px;font-weight:600}
+  .sum-box b{font-size:14px}.sum-box.prod{background:#fff6d8}.sum-box.ont{background:#e3f7ee}
+  .sum-filters{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:10px}
+  .sum-filters .chk{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+  .ms-wrap{position:relative;display:inline-block}
+  .ms-btn{background:white;color:var(--text);border:1px solid var(--line);font-weight:400;min-width:170px;text-align:left;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ms-panel{position:absolute;top:100%;left:0;margin-top:4px;background:white;border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:30;width:250px;padding:8px}
+  .ms-panel>input{width:100%;margin-bottom:6px}
+  .ms-list{max-height:260px;overflow:auto;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+  .ms-item{display:flex;align-items:center;gap:7px;padding:4px 2px;cursor:pointer}
+  .ms-item:hover{background:#eef3f8}
+  .ms-all{font-weight:700}
+  .ms-empty{padding:6px;color:#64748b}
+  </style>
 </head>
 <body>
   <div class="login" id="loginScreen"><form onsubmit="handleLogin(event)"><h2>Mentor Workstation By Fuad</h2><label>Username</label><input id="loginUsername" autocomplete="username" required><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required><div id="loginError" class="error" role="alert"></div><button id="loginButton" class="green">Sign In</button></form></div>
@@ -108,7 +108,54 @@
     async function loadProjects(){try{projects=JSON.parse(localStorage.getItem("MW_PROJECTS_V2")||"{}");}catch{projects={};}if(!Object.keys(projects).length&&localStorage.getItem("MW_PROJECTS_V2_EMPTY")!=="1"){const old=await db.series_parts.toArray();old.forEach(r=>{const key=r.project_name||"Imported Project";(projects[key]??=[]).push({opId:String(r.op_id||""),name:r.full_name||"",seriesNo:String(r.series_number||""),startImg:r.start_img||"",endImg:r.end_img||"",disImg:+r.dis_img||0,tImg:+r.t_img||0,entry:+r.entry_count||0,status:r.status||"Entry",mentorName:r.mentor_name||"Unassigned",comment:r.qc_reject_comment||""});});save();}const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;await syncMentorNamesFromSupabase();}
     async function syncMentorNamesFromSupabase(){if(!supabaseClient)return;const{data,error}=await supabaseClient.from("operators").select("op_id,mentor_name");if(error){console.error("Unable to load operator mentors from the cloud:",error);return;}const mentorByOpId=new Map();(data||[]).forEach(o=>{const opId=String(o.op_id||"").trim().toLowerCase(),mentorName=String(o.mentor_name||"").trim();if(opId&&mentorName)mentorByOpId.set(opId,mentorName);});let changed=false;Object.values(projects).forEach(rows=>rows.forEach(p=>{const mentorName=mentorByOpId.get(String(p.opId||"").trim().toLowerCase());if(mentorName&&p.mentorName!==mentorName){p.mentorName=mentorName;changed=true;}}));if(changed)save();}
     function save(){localStorage.setItem("MW_PROJECTS_V2",JSON.stringify(projects));if(Object.keys(projects).length)localStorage.removeItem("MW_PROJECTS_V2_EMPTY");else localStorage.setItem("MW_PROJECTS_V2_EMPTY","1");}
-    async function uploadExcel(e){const file=e.target.files[0];e.target.value="";if(!file)return;const name=prompt("Project name:");if(!name?.trim())return;try{const wb=XLSX.read(await file.arrayBuffer(),{type:"array"}),rows=[];wb.SheetNames.forEach(sheet=>XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:""}).forEach(r=>{const opId=String(r["Op.ID"]||r["Operator ID"]||r.OpId||"").trim(),seriesNo=String(r["Series Number"]||r.Series||"").trim();if(!opId||!seriesNo||seriesNo.toLowerCase().includes("total"))return;rows.push({opId,name:String(r.Name||""),seriesNo,startImg:String(r["Start Img"]||r["Start Image"]||""),endImg:String(r["End Img"]||r["End Image"]||""),disImg:+r["Dis:Img"]||0,tImg:+r["T.Img"]||0,entry:+r.Entry||0,status:String(r.Status||"Entry"),mentorName:String(r.Mentor||r["Mentor Name"]||"Unassigned"),comment:""});}));if(!rows.length)throw Error("No valid rows found.");projects[name.trim()]=rows;save();await loadProjects();document.getElementById("projectSelect").value=name.trim();renderAll();}catch(err){alert(err.message);}}
+
+    /* ===== mergeUpload: Keep finished work, sync Done status silently ===== */
+    function mergeUpload(existingRows, rows, mode="add"){
+      const normVal = v => String(v || "").trim().toLowerCase();
+      const find = np => {
+        const op = normVal(np.opId), ser = normVal(np.seriesNo), sImg = normVal(np.startImg);
+        return existingRows.find(e => normVal(e.opId) === op && normVal(e.seriesNo) === ser && (!sImg || normVal(e.startImg) === sImg));
+      };
+      let out = [...existingRows];
+      let added = 0;
+      if(mode === "add"){
+        let doneSync = 0;
+        rows.forEach(np => {
+          const e = find(np);
+          if(!e){
+            out.push(np);
+            added++;
+          } else if(norm(np.status) === "done" && norm(e.status) !== "done"){
+            e.status = "Done";
+            if(np.distDate) e.distDate = np.distDate;
+            doneSync++;
+          }
+        });
+        return {
+          rows: out,
+          merged: true,
+          note: `${added} new part${added===1?"":"s"} added${doneSync?`, ${doneSync} marked Done`:""}; all your existing parts and work were kept.`
+        };
+      } else {
+        out = [];
+        rows.forEach(np => {
+          const e = find(np);
+          const p = { ...np };
+          if(e){
+            if(!p.comment) p.comment = e.comment || "";
+            if(norm(e.status) === "done") p.status = "Done";
+          }
+          if(norm(np.status) === "done") p.status = "Done";
+          out.push(p);
+        });
+        return {
+          rows: out,
+          merged: true,
+          note: `Updated ${rows.length} parts from Excel while keeping remarks and Done flags.`
+        };
+      }
+    }
+
     function deleteProject(){const name=project();if(!name)return;const adm=String(currentUser?.role||"").toLowerCase()==="admin";if(!confirm(`Delete project ${name}?`+(adm?"\n\nThis also deletes it from the PC server.":"")))return;delete projects[name];save();if(adm)removeOnline([name]);loadProjects().then(renderAll);}
     function openRenameProject(){const oldName=project();if(!oldName)return showStatusPopup("No Project Selected","Select a project before renaming it.");openModal("Rename Project",`<label>Current project name</label><input value="${esc(oldName)}" disabled><label for="renamedProjectName">New project name</label><input id="renamedProjectName" value="${esc(oldName)}" required>`,async()=>{const newName=document.getElementById("renamedProjectName").value.trim();if(!newName)return showStatusPopup("Project Name Required","Enter a new project name.");if(newName!==oldName&&Object.prototype.hasOwnProperty.call(projects,newName))return showStatusPopup("Project Already Exists","Choose a name that is not already in use.");if(newName===oldName)return closeModal();const rows=projects[oldName];delete projects[oldName];projects[newName]=rows;productionRows=productionRows.map(row=>row.projectName===oldName?{...row,projectName:newName}:row);try{const drafts=JSON.parse(localStorage.getItem(productionDraftKey())||"[]").map(row=>row.projectName===oldName?{...row,projectName:newName}:row);localStorage.setItem(productionDraftKey(),JSON.stringify(drafts));}catch{}productionProjectKey=Object.keys(projects).join("\u001f");save();renameOnline(oldName,newName);const select=document.getElementById("projectSelect"),previous=select.value;select.innerHTML=Object.keys(projects).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");select.value=previous===oldName?newName:previous;closeModal();renderAll();let cloudMessage="Supabase history renamed.";try{const{error}=await supabaseClient.from("daily_production_summaries").update({project_name:newName}).eq("project_name",oldName);if(error)cloudMessage=`Local project renamed, but Supabase history was not changed: ${error.message}`;else await loadCloud();}catch(error){cloudMessage=`Local project renamed, but Supabase history could not be updated: ${error.message||"Cloud unavailable"}`;}showStatusPopup("Project Renamed",`${oldName} is now ${newName}. ${cloudMessage}`);});document.getElementById("modalSaveBtn").textContent="Rename Project";}
 
@@ -209,14 +256,76 @@
     function saveProductionSummary(){localStorage.setItem(productionDraftKey(),JSON.stringify(productionRows));alert("Production summary saved on this device.");}
     function viewSavedSummary(){showTab("summary",document.querySelector(".tab-btn[onclick*=\"showTab('summary'\"]"));showSummaryView("historyView");}
     submitProduction=async function(){const records=productionRows.filter(row=>String(row.projectName||"").trim()).map(row=>({mentor_name:currentUser.full_name||currentUser.username,project_name:row.projectName,work_date:row.workDate||document.getElementById("workDate").value,production_count:+row.productionCount||0,done_parts_count:donePartsCount(row.projectName),sum_entry_count:+row.ontestCount||0,comments:row.comment??document.getElementById("workComment").value}));if(!records.length)return alert("Add at least one project row before submitting.");const{error}=await supabaseClient.from("daily_production_summaries").insert(records);if(error)return alert(error.message);localStorage.removeItem(productionDraftKey());alert(`${records.length} project production row${records.length===1?"":"s"} submitted to Supabase.`);await loadCloud();};
-    uploadExcel=async function(event){const file=event.target.files[0];event.target.value="";if(!file)return;openModal("Upload Project Excel",'<label for="excelProjectName">Project name</label><input id="excelProjectName" placeholder="Enter a project name" required>',async()=>{const name=document.getElementById("excelProjectName").value.trim();if(!name)return alert("Enter a project name.");try{const workbook=XLSX.read(await file.arrayBuffer(),{type:"array"}),rows=[],aliases={opId:["opid","operatorid","operatorno","operatornumber","operatorcode","idno","idnumber","employeeid","empid","staffid"],name:["name","operatorname","fullname","employeename","staffname"],seriesNo:["seriesnumber","seriesno","series","seriescode","serialnumber","serialno","serial"],startImg:["startimg","startimage","startimagecount"],endImg:["endimg","endimage","endimagecount"],disImg:["disimg","distimg","distributionimg","distributedimg","distributeimg"],distDate:["disdate","distdate","distributiondate","distributedate","disdt","distdt","dispatchdate","disdatee"],tImg:["timg","totalimg","totalimage","totalimages","imagecount","images"],entry:["entry","entrycount","totalentry","totalentries","sumentrycount"],status:["status","partstatus","processstatus"],mentorName:["mentor","mentorname"],comment:["comment","comments","qccomment","rejectcomment"]},headerKey=value=>String(value??"").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g,"");workbook.SheetNames.forEach(sheet=>{const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{header:1,defval:"",blankrows:false});if(!matrix.length)return;const candidates=matrix.slice(0,50).map((header,index)=>{const keys=header.map(headerKey),columns={};Object.entries(aliases).forEach(([field,names])=>{columns[field]=keys.findIndex(key=>names.includes(key));});const recognized=Object.values(columns).filter(column=>column>=0).length;return{index,columns,recognized};}).filter(candidate=>candidate.columns.seriesNo>=0).sort((a,b)=>b.recognized-a.recognized);if(!candidates.length)return;const{index:headerIndex,columns}=candidates[0];matrix.slice(headerIndex+1).forEach(record=>{const value=field=>columns[field]>=0?String(record[columns[field]]??"").trim():"",seriesNo=value("seriesNo"),opId=value("opId");if(!seriesNo||/^(total|grand total|subtotal)\b/i.test(seriesNo))return;const number=field=>{const parsed=Number(value(field).replace(/,/g,""));return Number.isFinite(parsed)?parsed:0;};rows.push({opId,name:value("name"),seriesNo,startImg:value("startImg"),endImg:value("endImg"),disImg:number("disImg"),tImg:number("tImg"),entry:number("entry"),status:value("status")||"Entry",mentorName:value("mentorName")||"Unassigned",comment:value("comment"),distDate:fmtDistDate(columns.distDate>=0?record[columns.distDate]:"")});});});if(!rows.length)throw Error("No series-based rows found. Add a Series, Series No, or Series Number column with data below its header row.");projects[name]=rows;save();autoPushProject(name);await loadProjects();document.getElementById("projectSelect").value=name;renderAll();closeModal();const seriesCount=new Set(rows.map(row=>row.seriesNo)).size;openModal("Parts Imported",`<p>${rows.length} parts imported to <strong>${esc(name)}</strong>.</p><p>${seriesCount} series found across ${workbook.SheetNames.length} worksheet${workbook.SheetNames.length===1?"":"s"}.</p>`,closeModal);document.getElementById("modalSaveBtn").textContent="Close";}catch(error){alert(error.message||"Excel upload failed.");}});};
+
+    /* ===== Upload Excel: Edit A with add/update dropdown choices and merge ===== */
+    uploadExcel=async function(event){
+      const file=event.target.files[0];event.target.value="";if(!file)return;
+      openModal("Upload Project Excel",
+        '<label for="excelProjectName">Project name</label><input id="excelProjectName" placeholder="Enter a project name" required>' +
+        '<label for="excelImportMode">Import Mode</label><select id="excelImportMode">' +
+        '<option value="add">Only add new parts (keep everything else)</option>' +
+        '<option value="update">Keep my work, update from the new Excel</option>' +
+        '</select>',
+        async()=>{
+          const name=document.getElementById("excelProjectName").value.trim();
+          const mode=document.getElementById("excelImportMode")?.value||"add";
+          if(!name)return alert("Enter a project name.");
+          try{
+            const workbook=XLSX.read(await file.arrayBuffer(),{type:"array"}),rows=[],
+            aliases={opId:["opid","operatorid","operatorno","operatornumber","operatorcode","idno","idnumber","employeeid","empid","staffid"],name:["name","operatorname","fullname","employeename","staffname"],seriesNo:["seriesnumber","seriesno","series","seriescode","serialnumber","serialno","serial"],startImg:["startimg","startimage","startimagecount"],endImg:["endimg","endimage","endimagecount"],disImg:["disimg","distimg","distributionimg","distributedimg","distributeimg"],distDate:["disdate","distdate","distributiondate","distributedate","disdt","distdt","dispatchdate","disdatee"],tImg:["timg","totalimg","totalimage","totalimages","imagecount","images"],entry:["entry","entrycount","totalentry","totalentries","sumentrycount"],status:["status","partstatus","processstatus"],mentorName:["mentor","mentorname"],comment:["comment","comments","qccomment","rejectcomment"]},
+            headerKey=value=>String(value??"").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g,"");
+            
+            workbook.SheetNames.forEach(sheet=>{
+              const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{header:1,defval:"",blankrows:false});
+              if(!matrix.length)return;
+              const candidates=matrix.slice(0,50).map((header,index)=>{
+                const keys=header.map(headerKey),columns={};
+                Object.entries(aliases).forEach(([field,names])=>{columns[field]=keys.findIndex(key=>names.includes(key));});
+                const recognized=Object.values(columns).filter(column=>column>=0).length;
+                return{index,columns,recognized};
+              }).filter(candidate=>candidate.columns.seriesNo>=0).sort((a,b)=>b.recognized-a.recognized);
+              if(!candidates.length)return;
+              const{index:headerIndex,columns}=candidates[0];
+              matrix.slice(headerIndex+1).forEach(record=>{
+                const value=field=>columns[field]>=0?String(record[columns[field]]??"").trim():"",seriesNo=value("seriesNo"),opId=value("opId");
+                if(!seriesNo||/^(total|grand total|subtotal)\b/i.test(seriesNo))return;
+                const number=field=>{const parsed=Number(value(field).replace(/,/g,""));return Number.isFinite(parsed)?parsed:0;};
+                rows.push({opId,name:value("name"),seriesNo,startImg:value("startImg"),endImg:value("endImg"),disImg:number("disImg"),tImg:number("tImg"),entry:number("entry"),status:value("status")||"Entry",mentorName:value("mentorName")||"Unassigned",comment:value("comment"),distDate:fmtDistDate(columns.distDate>=0?record[columns.distDate]:"")});
+              });
+            });
+            if(!rows.length)throw Error("No series-based rows found. Add a Series, Series No, or Series Number column with data below its header row.");
+            
+            let importNote = "";
+            if(projects[name] && projects[name].length){
+              const merged = mergeUpload(projects[name], rows, mode);
+              projects[name] = merged.rows;
+              importNote = merged.note;
+            } else {
+              projects[name] = rows;
+              importNote = `${rows.length} parts imported to <strong>${esc(name)}</strong>.`;
+            }
+            save();
+            autoPushProject(name);
+            await loadProjects();
+            document.getElementById("projectSelect").value=name;
+            renderAll();
+            closeModal();
+            const seriesCount=new Set(projects[name].map(row=>row.seriesNo)).size;
+            openModal("Parts Imported",`<p>${importNote}</p><p>${seriesCount} series found across ${workbook.SheetNames.length} worksheet${workbook.SheetNames.length===1?"":"s"}.</p>`,closeModal);
+            document.getElementById("modalSaveBtn").textContent="Close";
+          }catch(error){alert(error.message||"Excel upload failed.");}
+        }
+      );
+    };
+
     let historyMonthInitialized=false;
     renderMonthlyHistory=function(){const body=document.getElementById("monthlyBody"),month=+document.getElementById("historyMonth").value,year=+document.getElementById("historyYear").value;if(!year)return;const dated=monthlyHistoryRows.map(row=>({row,date:parseSummaryDate(row.work_date)})).filter(item=>item.date);if(!historyMonthInitialized){historyMonthInitialized=true;if(dated.length&&!dated.some(item=>item.date.year===year&&item.date.month===month)){const latest=dated.reduce((a,b)=>new Date(a.date.year,a.date.month-1,a.date.day)>new Date(b.date.year,b.date.month-1,b.date.day)?a:b);document.getElementById("historyMonth").value=latest.date.month;document.getElementById("historyYear").value=latest.date.year;}}const selectedMonth=+document.getElementById("historyMonth").value,selectedYear=+document.getElementById("historyYear").value,rows=dated.filter(item=>item.date.month===selectedMonth&&item.date.year===selectedYear).map(item=>item.row);body.innerHTML=rows.map(row=>`<tr><td>${esc(row.mentor_name)}</td><td>${esc(row.project_name)}</td><td>${esc(row.work_date)}</td><td>${+row.production_count||0}</td><td>${+row.sum_entry_count||0}</td><td>${esc(row.comments)}</td></tr>`).join("")||'<tr><td colspan="6">No submissions for this month.</td></tr>';drawCharts(rows);};
     loadCloud=async function(){if(!supabaseClient)return;const rows=[];for(let offset=0;;offset+=1000){const{data,error}=await supabaseClient.from("daily_production_summaries").select("id,mentor_name,project_name,work_date,production_count,done_parts_count,sum_entry_count,comments").order("work_date",{ascending:false}).range(offset,offset+999);if(error){document.getElementById("monthlyBody").innerHTML=`<tr><td colspan="6">${esc(error.message)}</td></tr>`;return;}rows.push(...(data||[]));if(!data||data.length<1000)break;}rows.sort((a,b)=>{const dateA=parseSummaryDate(a.work_date),dateB=parseSummaryDate(b.work_date);return(dateB?new Date(dateB.year,dateB.month-1,dateB.day).getTime():0)-(dateA?new Date(dateA.year,dateA.month-1,dateA.day).getTime():0);});monthlyHistoryRows=rows;drawCharts(rows);renderMonthlyHistory();};
     drawCharts=function(rows){const mentors={};rows.forEach(row=>{const name=row.mentor_name||"Unknown";mentors[name]??={production:0,ontest:0};mentors[name].production+=+row.production_count||0;mentors[name].ontest+=+row.sum_entry_count||0;});const names=Object.keys(mentors).sort(),colors=["#218c5a","#1769aa","#a66a2c","#bd3b3b","#506d83","#7a8b3a","#d17a22"],fields=[["productionChart","productionLegend","production"],["ontestChart","ontestLegend","ontest"]];fields.forEach(([canvasId,legendId,field])=>{const old=canvasId==="productionChart"?productionChart:ontestChart;old?.destroy();const values=names.map(name=>mentors[name][field]),canvas=document.getElementById(canvasId),chart=new Chart(canvas,{type:"doughnut",data:{labels:names,datasets:[{data:values,backgroundColor:names.map((_,index)=>colors[index%colors.length])}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});if(canvasId==="productionChart")productionChart=chart;else ontestChart=chart;document.getElementById(legendId).innerHTML=names.map((name,index)=>`<li><span class="legend-swatch" style="background:${colors[index%colors.length]}"></span><span>${esc(name)}</span><strong>${values[index].toLocaleString()}</strong></li>`).join("")||"<li>No production data</li>";});};
     const showSummaryViewBase=showSummaryView;showSummaryView=function(id){showSummaryViewBase(id);if(id==="historyView")renderMonthlyHistory();};
+    
     // ---------- Mentor Summary: mentor checkbox picker, date range, metric toggles ----------
-    let summaryRows=[],summaryMentorList=[],summarySelectedMentors=null,summaryLoaded=false; // selected null = all mentors
+    let summaryRows=[],summaryMentorList=[],summarySelectedMentors=null,summaryLoaded=false;
     const $sum=id=>document.getElementById(id),pad2=n=>String(n).padStart(2,"0"),toIso=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
     loadMonthlyPivot=async function(){
       if(!supabaseClient)return;
@@ -367,7 +476,6 @@
     document.getElementById("summaryMonth").addEventListener("change",refreshSelectedMonthlyPivot);document.getElementById("summaryYear").addEventListener("change",refreshSelectedMonthlyPivot);document.addEventListener("click",event=>{if(!event.target.closest(".profile-wrap"))closeProfileMenu();});document.addEventListener("keydown",event=>{if(event.key==="Escape")closeProfileMenu();});
     function showImportedProjects(results){const totalParts=results.reduce((sum,result)=>sum+result.parts,0),items=results.map(result=>`<li><strong>${esc(result.name)}</strong>: ${result.parts} parts, ${result.series} series</li>`).join("");openModal("Projects Imported",`<p>${results.length} project${results.length===1?"":"s"} imported (${totalParts} parts total).</p><ul>${items}</ul>`,closeModal);document.getElementById("modalSaveBtn").textContent="Close";}
     async function uploadMultipleExcels(event){const files=[...(event.target.files||[])];event.target.value="";if(!files.length)return;const results=[],usedNames=new Set();async function requestProjectName(index){const file=files[index],baseName=file.name.replace(/\.[^.]+$/,"" ).trim()||"Imported Project";await uploadExcel({target:{files:[file],value:""}});const nameInput=document.getElementById("excelProjectName");if(!nameInput)return;nameInput.value=baseName;const body=document.getElementById("modalBody"),fileNote=document.createElement("p"),errorNote=document.createElement("p");fileNote.textContent=`File ${index+1} of ${files.length}: ${file.name}`;errorNote.id="multiProjectNameError";errorNote.className="error";body.prepend(fileNote);body.append(errorNote);document.getElementById("modalTitle").textContent=`Project Name (${index+1} of ${files.length})`;document.getElementById("modalSaveBtn").textContent=index+1<files.length?"Import and Next":"Import Project";const importFile=modalSaveHandler;modalSaveHandler=async()=>{const name=nameInput.value.trim();if(!name){errorNote.textContent="Enter a project name.";nameInput.focus();return;}if(usedNames.has(name)){errorNote.textContent="Each selected workbook needs a unique project name.";nameInput.focus();return;}if(Object.prototype.hasOwnProperty.call(projects,name)){errorNote.textContent="That project name already exists. Choose a different name to avoid replacing it.";nameInput.focus();return;}await importFile();if(document.getElementById("modalTitle").textContent!=="Parts Imported")return;const rows=projects[name];if(!rows)return;usedNames.add(name);results.push({name,parts:rows.length,series:new Set(rows.map(row=>row.seriesNo)).size});closeModal();if(index+1<files.length)await requestProjectName(index+1);else showImportedProjects(results);};}await requestProjectName(0);}
-    function deleteAllProjectExcel(){const names=Object.keys(projects);if(!names.length)return showStatusPopup("No Projects","There are no uploaded projects to delete.");openModal("Delete All Project Excel",`<p>Delete all ${names.length} locally uploaded project${names.length===1?"":"s"}?</p>${String(currentUser?.role||"").toLowerCase()==="admin"?"<p><b>They will also be deleted from the PC server.</b></p>":""}<p>Production summaries already submitted to Supabase will not be deleted.</p>`,()=>{if(String(currentUser?.role||"").toLowerCase()==="admin")removeOnline(names);projects={};save();localStorage.removeItem(productionDraftKey());productionRows=[];productionProjectKey="";document.getElementById("projectSelect").innerHTML="";closeModal();renderAll();showStatusPopup("Projects Deleted",`${names.length} local project${names.length===1?"":"s"} deleted.`);});document.getElementById("modalSaveBtn").textContent="Delete All";}
 
     function toggleProjectMenu(e){e&&e.stopPropagation();document.getElementById("projectMenu")?.classList.toggle("hidden");}
     function closeProjectMenu(){document.getElementById("projectMenu")?.classList.add("hidden");}
@@ -560,6 +668,7 @@ localStorage.setItem(PCK,JSON.stringify({url,key:ak}));localStorage.setItem(PCS,
 try{const{error}=await supabaseClient.from("pc_server_config").upsert({id:1,url,view_key:vk,updated_at:new Date().toISOString(),updated_by:currentUser.full_name||currentUser.username},{onConflict:"id"});if(error)throw error;msg.style.color="#218c5a";msg.textContent="✔ Connected and shared with all users.";}catch(e){return bad("Connected, but not shared with users yet. Run the one-time setup (Setup SQL button), then Save again. "+(e.message||""));}
 setTimeout(()=>{closeModal();syncProjects(false);loadOnlineProjects();},1000);});document.getElementById("modalSaveBtn").textContent="Save & Test";}
 const listOnline=()=>pcFetch("/projects"),enc=encodeURIComponent;
+
 /* ===== Live sync engine: mentors' work follows them between browsers through the PC server ===== */
 const BASEK="MW_SYNC_BASE_V1",EPK="MW_EPOCHS_V1",KVK="MW_KV_SYNC_V1",rawSet=Storage.prototype.setItem,rawRem=Storage.prototype.removeItem;
 let syncBase=rdJ(BASEK),kvSync=rdJ(KVK),pushTimer=null,kvTimer=null,pushBusy=false,pushAgain=false,pollBusy=false,renderPending=false,liveState="idle",lastCfgTry=0,lastInput=0,liveStarted=false;
@@ -576,9 +685,11 @@ window.addEventListener("online",()=>{updateNetBadge();try{if(typeof pollState==
 updateNetBadge();
 async function pullProject(name,ifClean){const d=await pcFetch("/projects/"+enc(name));if(ifClean&&projects[name]&&isDirty(name))return false;projects[name]=Array.isArray(d.parts)?d.parts:[];syncBase[name]=hashesOf(projects[name]);saveBase();setStamp(name,d.version);setEpoch(name,d.epoch);return true;}
 async function pushNames(names){const by=currentUser.full_name||currentUser.username;let n=0;for(const name of names){const rows=projects[name]||[];if(!rows.length)continue;const snap=hashesOf(rows),r=await pcFetch("/projects/"+enc(name),{method:"PUT",body:JSON.stringify({parts:rows,updated_by:by})});syncBase[name]=snap;saveBase();setStamp(name,r.version);setEpoch(name,r.epoch);n++;}return n;}
+
 /* --- your changes -> PC (only the parts YOU changed, merged by the server) */
 function schedulePush(ms){if(!syncOn())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushDirty(),ms||1200);}
 async function pushDirty(){if(!syncOn())return;if(pushBusy){pushAgain=true;return;}pushBusy=true;const by=currentUser.full_name||currentUser.username;try{for(const name of Object.keys(projects)){const d=diffProject(name);if(!d||!d.dirty)continue;setSyncLabel("saving");try{const r=await pcFetch("/projects/"+enc(name),{method:"PATCH",body:JSON.stringify({upserts:d.upserts,deletes:d.deletes,base_version:getStamps()[name]||"",epoch:getEpochs()[name]||"",updated_by:by})});syncBase[name]=d.snap;saveBase();if(r.merged){if(await pullProject(name,true))renderPending=true;}else setStamp(name,r.version);}catch(e){if(e.code==="HTTP409"){await pullProject(name);renderPending=true;}else if(e.code==="HTTP404")forget(name);else throw e;}}await pushKv();setSyncLabel("live");}catch(e){setSyncLabel("offline");}finally{pushBusy=false;if(pushAgain){pushAgain=false;schedulePush(300);}if(renderPending)refreshUi();}}
+
 /* --- drafts + QC list of the logged-in user (follow them to another browser) */
 const kvUser=()=>norm(currentUser?.username||currentUser?.full_name||"user"),kvMap=()=>[["MW_PRODUCTION_SUMMARY_"+kvUser(),"draft:"+kvUser()],["MW_QC_DONE_V1","qc:"+kvUser()]];
 function kvUserGuard(){const u=kvUser(),lu=localStorage.getItem("MW_KV_USER");if(lu&&lu!==u)rawRem.call(localStorage,"MW_QC_DONE_V1");if(lu!==u)rawSet.call(localStorage,"MW_KV_USER",u);}
@@ -588,6 +699,7 @@ const schedKv=()=>{if(!syncOn())return;clearTimeout(kvTimer);kvTimer=setTimeout(
 Storage.prototype.setItem=function(k,v){rawSet.call(this,k,v);if(this===localStorage&&isKvKey(k))schedKv();};
 Storage.prototype.removeItem=function(k){rawRem.call(this,k);if(this===localStorage&&isKvKey(k))schedKv();};
 const _saveLocal=save;save=function(){_saveLocal();schedulePush();};
+
 /* --- PC -> your screen (checked every few seconds) */
 async function refreshUi(){const ov=document.getElementById("modalOverlay"),ae=document.activeElement,typing=Date.now()-lastInput<4000&&ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);if((ov&&!ov.classList.contains("hidden"))||typing){renderPending=true;return;}renderPending=false;const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;try{renderAll();renderQC();}catch(e){console.error(e);}}
 async function pollState(){if(pollBusy||!syncOn())return;pollBusy=true;try{kvUserGuard();await pushDirty();const st=await pcFetch("/state?keys="+enc(kvMap().map(m=>m[1]).join(",")));const online=new Map(st.projects.map(o=>[o.project_name,o])),stamps=getStamps();let changed=false;
@@ -597,9 +709,10 @@ if(changed){_saveLocal();renderPending=true;}if(await pollKv(st.kv))renderPendin
 async function syncProjects(manual){await loadSharedPcConfig();if(!pcCfg().url){if(manual){if(isAdminUser())openPcSettings();else showStatusPopup("Not Set Up","The admin has not set up the PC server yet.");}return;}await pollState();if(manual)showStatusPopup(liveState==="offline"?"Offline":"Synced",liveState==="offline"?"Could not reach the PC server. Your work is safe in this browser and is sent automatically when it is back.":"Your work is saved on the PC and this screen is up to date.");}
 function startLive(){if(liveStarted)return;liveStarted=true;document.addEventListener("input",()=>{lastInput=Date.now();},true);setInterval(()=>{if(!document.hidden)pollState();},5000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)pollState();});window.addEventListener("focus",()=>pollState());
 window.addEventListener("pagehide",()=>{try{const c=pcCfg();if(!syncOn())return;const base=c.url.replace(/\/+$/,""),hd={"X-Key":c.key,"Content-Type":"application/json"};for(const n of Object.keys(projects)){const d=diffProject(n);if(!d||!d.dirty)continue;const body=JSON.stringify({upserts:d.upserts,deletes:d.deletes,base_version:getStamps()[n]||"",epoch:getEpochs()[n]||"",updated_by:currentUser.full_name||currentUser.username});if(body.length<60000)fetch(base+"/projects/"+enc(n),{method:"PATCH",keepalive:true,headers:hd,body});}}catch{}});}
+
 /* mentors cannot delete shared projects */
 const _dp=deleteProject;deleteProject=function(){if(pcCfg().url&&!isAdminUser()&&getStamps()[project()])return showStatusPopup("Admin Only","This project is shared through the PC server. Only an admin can delete it.");return _dp.apply(this,arguments);};
-const _dap=deleteAllProjectExcel;deleteAllProjectExcel=function(){if(pcCfg().url&&!isAdminUser())return showStatusPopup("Admin Only","Projects are shared through the PC server. Only an admin can delete all projects.");return _dap.apply(this,arguments);};
+
 async function pushProjectsOnline(){const msg=document.getElementById("onlineMsg");if(!isAdminUser())return alert("Only an admin can send projects to the PC.");const names=Object.keys(projects);if(!names.length)return msg.textContent="No projects in this browser to send.";if(!confirm(`Send ${names.length} project(s) to the PC server? Projects with the same name on the PC server will be replaced.`))return;try{msg.textContent="Sending...";const n=await pushNames(names);msg.textContent=`${n} project(s) saved on the PC.`;loadOnlineProjects();}catch(e){msg.textContent=e.message;}}
 async function loadOnlineProjects(){const body=document.getElementById("onlineBody"),msg=document.getElementById("onlineMsg");if(!body)return;try{const list=await listOnline();body.innerHTML=list.map(o=>`<tr><td>${esc(o.project_name)}</td><td>${o.part_count||0}</td><td>${esc(o.updated_at||"—")}</td><td>${esc(o.updated_by||"—")}</td><td><button class="blue" onclick="pullOne('${enc(o.project_name)}')">Load here</button> <button class="red" onclick="deleteOnline('${enc(o.project_name)}')">Delete on PC</button></td></tr>`).join("")||'<tr><td colspan="5">No projects on the PC server yet.</td></tr>';msg.textContent="";}catch(e){body.innerHTML="";msg.textContent=e.message;}}
 async function pullOne(e){const n=decodeURIComponent(e);if(projects[n]&&!confirm(`Replace your local copy of '${n}' with the PC version?`))return;try{await pullProject(n);save();await loadProjects();renderAll();document.getElementById("onlineMsg").textContent=`'${n}' loaded.`;}catch(er){alert(er.message||er);}}
@@ -615,6 +728,39 @@ async function autoPushProject(name){if(!isAdminUser())return;let text,bad=false
 for(let i=0;i<25;i++){const mt=document.getElementById("modalTitle"),mb=document.getElementById("modalBody");if(mt&&mt.textContent==="Parts Imported"&&mb&&mb.textContent.includes(name)){const p=document.createElement("p");p.textContent=text;p.style.fontWeight="600";p.style.color=bad?"#bd3b3b":"#218c5a";mb.append(p);return;}await new Promise(r=>setTimeout(r,200));}if(bad)alert(text);}
 async function removeOnline(names){names.forEach(n=>tomb.set(n,Date.now()));if(!isAdminUser()||!names.length||!pcCfg().url)return;for(const n of names){try{await pcFetch("/projects/"+enc(n),{method:"DELETE"});forget(n);}catch(e){alert(`Deleted here, but '${n}' could not be deleted on the PC: `+(e.message||e));return;}}}
 async function renameOnline(oldName,newName){tomb.set(oldName,Date.now());if(!isAdminUser()||!getStamps()[oldName])return;try{await pushNames([newName]);await pcFetch("/projects/"+enc(oldName),{method:"DELETE"});forget(oldName);}catch(e){alert("Renamed here, but the PC copy could not be renamed: "+(e.message||e));}}
+
+function flushDirtyNow(names){ schedulePush(0); }
+function hideShared(names){}
+
+/* Yes/No popup for Delete All, and keep production summary */
+const _openModalYN=openModal;
+openModal=function(...a){
+  _openModalYN(...a);
+  const c=document.querySelector("#modalOverlay .toolbar button:first-child");
+  if(c)c.textContent="Cancel";
+};
+
+deleteAllProjectExcel=function(){
+  const names=Object.keys(projects);
+  if(!names.length)return showStatusPopup("No Projects","There are no uploaded projects to delete.");
+  const admin=String(currentUser?.role||"").toLowerCase()==="admin";
+  openModal("Wipe out all projects?",
+    `<p><b>Do you want to wipe out ALL ${names.length} project${names.length===1?"":"s"}?</b></p>`+
+    (admin?"<p>They will also be deleted from the PC server.</p>"
+          :(pcCfg().url?"<p>Shared projects stay on the PC server. Click ☁ Sync Projects to bring them back.</p>":""))+
+    "<p>Your production summary and submitted history are NOT deleted.</p>",
+    ()=>{
+      if(admin)removeOnline(names);
+      else{flushDirtyNow(names);hideShared(names);}
+      try{localStorage.setItem(productionDraftKey(),JSON.stringify(productionRows));}catch{}
+      projects={};save();productionRows=[];productionProjectKey="";
+      document.getElementById("projectSelect").innerHTML="";
+      closeModal();renderAll();
+      showStatusPopup("Projects Deleted",`${names.length} project${names.length===1?"":"s"} wiped out.`);
+    });
+  document.getElementById("modalSaveBtn").textContent="Yes";
+  document.querySelector("#modalOverlay .toolbar button:first-child").textContent="No";
+};
 </script>
 </body>
 </html>
