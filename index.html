@@ -109,7 +109,7 @@
     async function syncMentorNamesFromSupabase(){if(!supabaseClient)return;const{data,error}=await supabaseClient.from("operators").select("op_id,mentor_name");if(error){console.error("Unable to load operator mentors from the cloud:",error);return;}const mentorByOpId=new Map();(data||[]).forEach(o=>{const opId=String(o.op_id||"").trim().toLowerCase(),mentorName=String(o.mentor_name||"").trim();if(opId&&mentorName)mentorByOpId.set(opId,mentorName);});let changed=false;Object.values(projects).forEach(rows=>rows.forEach(p=>{const mentorName=mentorByOpId.get(String(p.opId||"").trim().toLowerCase());if(mentorName&&p.mentorName!==mentorName){p.mentorName=mentorName;changed=true;}}));if(changed)save();}
     function save(){localStorage.setItem("MW_PROJECTS_V2",JSON.stringify(projects));if(Object.keys(projects).length)localStorage.removeItem("MW_PROJECTS_V2_EMPTY");else localStorage.setItem("MW_PROJECTS_V2_EMPTY","1");}
 
-    /* ===== mergeUpload: Keep finished work, sync Done status silently ===== */
+    /* ===== mergeUpload: Default to 'add', sync Done silently ===== */
     function mergeUpload(existingRows, rows, mode="add"){
       const normVal = v => String(v || "").trim().toLowerCase();
       const find = np => {
@@ -156,7 +156,103 @@
       }
     }
 
-    function deleteProject(){const name=project();if(!name)return;const adm=String(currentUser?.role||"").toLowerCase()==="admin";if(!confirm(`Delete project ${name}?`+(adm?"\n\nThis also deletes it from the PC server.":"")))return;delete projects[name];save();if(adm)removeOnline([name]);loadProjects().then(renderAll);}
+    /* ===== Local Hidden Projects Manager (Stops 5-second auto-restore) ===== */
+    const HIDDEN_K = "MW_HIDDEN_PROJECTS_V1";
+    function getHiddenProjects() {
+      try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_K) || "[]")); } catch { return new Set(); }
+    }
+    function hideShared(names) {
+      const hidden = getHiddenProjects();
+      names.forEach(n => hidden.add(n));
+      localStorage.setItem(HIDDEN_K, JSON.stringify([...hidden]));
+    }
+    function unhideAllShared() {
+      localStorage.removeItem(HIDDEN_K);
+    }
+
+    /* ===== Delete Single Project (Deletes from user browser, updates draft) ===== */
+    function deleteProject(){
+      const name = project();
+      if(!name) return showStatusPopup("No Project Selected", "Select a project to delete.");
+      const admin = String(currentUser?.role || "").toLowerCase() === "admin";
+      
+      openModal("Delete Project", 
+        `<p><b>Delete project '${esc(name)}' from your browser?</b></p>` +
+        (admin ? `<p><label><input type="checkbox" id="delServerCheck"> Also delete from the PC server for everyone</label></p>` : `<p style="color:#64748b">This deletes it from your screen. The shared copy stays on the PC server for other mentors.</p>`),
+        () => {
+          const alsoServer = admin && document.getElementById("delServerCheck")?.checked;
+          if (alsoServer) {
+            removeOnline([name]);
+          } else {
+            hideShared([name]);
+          }
+          delete projects[name];
+          save();
+          productionRows = productionRows.filter(r => r.projectName !== name);
+          try {
+            localStorage.setItem(productionDraftKey(), JSON.stringify(productionRows));
+          } catch(e) {}
+          closeModal();
+          loadProjects().then(renderAll);
+          showStatusPopup("Project Deleted", `'${name}' removed from your browser.`);
+        }
+      );
+      document.getElementById("modalSaveBtn").textContent = "Yes";
+      const noBtn = document.querySelector("#modalOverlay .toolbar button:first-child");
+      if(noBtn) noBtn.textContent = "No";
+    }
+
+    /* ===== Delete All Projects: Fresh Start (Wipes projects, done parts & draft) ===== */
+    function deleteAllProjectExcel() {
+      const names = Object.keys(projects);
+      if (!names.length) return showStatusPopup("No Projects", "There are no uploaded projects to delete.");
+      const admin = String(currentUser?.role || "").toLowerCase() === "admin";
+
+      openModal(
+        "Fresh Start — Wipe All Data?",
+        `<p><b>Do you want to wipe ALL ${names.length} project${names.length === 1 ? "" : "s"} and start fresh today?</b></p>` +
+        `<p style="color:#bd3b3b;font-weight:600;">This completely deletes all local projects, done parts, and production drafts from this browser.</p>` +
+        (admin 
+          ? `<p><label><input type="checkbox" id="delAllServerCheck"> Also wipe from the PC server for everyone</label></p>` 
+          : `<p style="color:#64748b">Shared projects remain safe on the PC server. Click ☁ Sync Projects if you ever want them back.</p>`),
+        () => {
+          const alsoServer = admin && document.getElementById("delAllServerCheck")?.checked;
+          if (alsoServer) {
+            removeOnline(names);
+          } else {
+            hideShared(names);
+          }
+          
+          // 1. Wipe all local projects & work
+          projects = {};
+          save();
+          
+          // 2. Completely wipe production draft and done parts memory
+          productionRows = [];
+          productionProjectKey = "";
+          try {
+            localStorage.removeItem(productionDraftKey());
+            localStorage.removeItem("faah_prod_draft");
+            localStorage.removeItem("faah_prod_pKey");
+            localStorage.removeItem("MW_QC_DONE_V1");
+          } catch(e) {}
+
+          const sel = document.getElementById("projectSelect");
+          if (sel) sel.innerHTML = "";
+
+          closeModal();
+          renderAll();
+          if (typeof renderQC === "function") renderQC();
+
+          showStatusPopup("Fresh Start Ready", `All ${names.length} project(s), done parts, and production drafts have been wiped.`);
+        }
+      );
+
+      document.getElementById("modalSaveBtn").textContent = "Yes";
+      const noBtn = document.querySelector("#modalOverlay .toolbar button:first-child");
+      if(noBtn) noBtn.textContent = "No";
+    }
+
     function openRenameProject(){const oldName=project();if(!oldName)return showStatusPopup("No Project Selected","Select a project before renaming it.");openModal("Rename Project",`<label>Current project name</label><input value="${esc(oldName)}" disabled><label for="renamedProjectName">New project name</label><input id="renamedProjectName" value="${esc(oldName)}" required>`,async()=>{const newName=document.getElementById("renamedProjectName").value.trim();if(!newName)return showStatusPopup("Project Name Required","Enter a new project name.");if(newName!==oldName&&Object.prototype.hasOwnProperty.call(projects,newName))return showStatusPopup("Project Already Exists","Choose a name that is not already in use.");if(newName===oldName)return closeModal();const rows=projects[oldName];delete projects[oldName];projects[newName]=rows;productionRows=productionRows.map(row=>row.projectName===oldName?{...row,projectName:newName}:row);try{const drafts=JSON.parse(localStorage.getItem(productionDraftKey())||"[]").map(row=>row.projectName===oldName?{...row,projectName:newName}:row);localStorage.setItem(productionDraftKey(),JSON.stringify(drafts));}catch{}productionProjectKey=Object.keys(projects).join("\u001f");save();renameOnline(oldName,newName);const select=document.getElementById("projectSelect"),previous=select.value;select.innerHTML=Object.keys(projects).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");select.value=previous===oldName?newName:previous;closeModal();renderAll();let cloudMessage="Supabase history renamed.";try{const{error}=await supabaseClient.from("daily_production_summaries").update({project_name:newName}).eq("project_name",oldName);if(error)cloudMessage=`Local project renamed, but Supabase history was not changed: ${error.message}`;else await loadCloud();}catch(error){cloudMessage=`Local project renamed, but Supabase history could not be updated: ${error.message||"Cloud unavailable"}`;}showStatusPopup("Project Renamed",`${oldName} is now ${newName}. ${cloudMessage}`);});document.getElementById("modalSaveBtn").textContent="Rename Project";}
 
     function mentorMatchesCurrentUser(value){const mentor=norm(value),names=[currentUser?.full_name,currentUser?.username].filter(Boolean).map(norm);return names.some(name=>mentor===name||name.length>2&&mentor.includes(name)||mentor.length>2&&name.includes(mentor));}
@@ -257,7 +353,7 @@
     function viewSavedSummary(){showTab("summary",document.querySelector(".tab-btn[onclick*=\"showTab('summary'\"]"));showSummaryView("historyView");}
     submitProduction=async function(){const records=productionRows.filter(row=>String(row.projectName||"").trim()).map(row=>({mentor_name:currentUser.full_name||currentUser.username,project_name:row.projectName,work_date:row.workDate||document.getElementById("workDate").value,production_count:+row.productionCount||0,done_parts_count:donePartsCount(row.projectName),sum_entry_count:+row.ontestCount||0,comments:row.comment??document.getElementById("workComment").value}));if(!records.length)return alert("Add at least one project row before submitting.");const{error}=await supabaseClient.from("daily_production_summaries").insert(records);if(error)return alert(error.message);localStorage.removeItem(productionDraftKey());alert(`${records.length} project production row${records.length===1?"":"s"} submitted to Supabase.`);await loadCloud();};
 
-    /* ===== Upload Excel: Edit A with add/update dropdown choices and merge ===== */
+    /* ===== Upload Excel: 'add' is default, keeps existing parts intact ===== */
     uploadExcel=async function(event){
       const file=event.target.files[0];event.target.value="";if(!file)return;
       openModal("Upload Project Excel",
@@ -653,19 +749,27 @@ try{let q=supabaseClient.from("daily_production_summaries").update(patch).eq("id
 function deleteSubmission(id){const r=findSub(id);if(!r||!canEditRow(r))return showStatusPopup("Not Allowed","You can only delete your own submissions.");if(!confirm(`Delete this submission?\n\n${r.project_name} · ${r.work_date}\nProduction ${+r.production_count||0}, Ontest ${+r.sum_entry_count||0}\n\nThis cannot be undone.`))return;(async()=>{try{let q=supabaseClient.from("daily_production_summaries").delete().eq("id",r.id);if(!isAdminUser())q=q.eq("mentor_name",r.mentor_name);const{data,error}=await q.select("id");if(error)throw error;if(!data||!data.length)throw Error("Nothing was deleted. The server did not allow this change.");await loadCloud();showStatusPopup("Deleted","The submission was deleted.");}catch(e){showStatusPopup("Delete Failed",String(e.message||e));}})();}
 
 /* ===== Project Excel data: PC Project Server -> every user ===== */
-const PCK="MW_PC_SERVER",PCS="MW_PC_SHARED",STAMPS="MW_ONLINE_STAMPS",rdJ=k=>{try{return JSON.parse(localStorage.getItem(k)||"{}")}catch{return{}}},pcCfg=()=>{const own=rdJ(PCK),sh=rdJ(PCS);return isAdminUser()&&own.url&&own.key?own:(sh.url&&sh.key?sh:{});},getStamps=()=>{try{return JSON.parse(localStorage.getItem(STAMPS)||"{}")}catch{return{}}},setStamp=(n,t)=>{const m=getStamps();m[n]=t;localStorage.setItem(STAMPS,JSON.stringify(m));},delStamp=n=>{const m=getStamps();delete m[n];localStorage.setItem(STAMPS,JSON.stringify(m));};
+const PCK="MW_PC_SERVER",PCS="MW_PC_SHARED",STAMPS="MW_ONLINE_STAMPS",rdJ=k=>{try{return JSON.parse(localStorage.getItem(k)||"{}")}catch{return{}}},mkCfg=o=>{if(!o||!o.url||!o.key)return{};const urls=[...new Set(String(o.url).split(/[\s,]+/).filter(Boolean).map(u=>u.replace(/\/+$/,"")))];return{url:urls[0],urls,key:o.key};},pcCfg=()=>{const own=rdJ(PCK),sh=rdJ(PCS);return isAdminUser()&&own.url&&own.key?mkCfg(own):(sh.url&&sh.key?mkCfg(sh):{});},getStamps=()=>{try{return JSON.parse(localStorage.getItem(STAMPS)||"{}")}catch{return{}}},setStamp=(n,t)=>{const m=getStamps();m[n]=t;localStorage.setItem(STAMPS,JSON.stringify(m));},delStamp=n=>{const m=getStamps();delete m[n];localStorage.setItem(STAMPS,JSON.stringify(m));};
+let pcPref=null,lastElect=0;
+const pcRaw=(base,path,opt,key)=>fetch(base.replace(/\/+$/,"")+path,{...opt,headers:{"X-Key":key,...(opt.body?{"Content-Type":"application/json"}:{}),...(opt.headers||{})}});
+async function pcElect(c){lastElect=Date.now();const rs=await Promise.all((c.urls||[c.url]).map(async(u,i)=>{try{const r=await pcRaw(u,"/ping",{},c.key);if(!r.ok)return null;const j=await r.json();return{u,i,term:+j.term||0,primary:j.mode!=="replica"};}catch{return null;}}));const ok=rs.filter(Boolean).sort((x,y)=>(y.primary-x.primary)||y.term-x.term||x.i-y.i);pcPref=ok.length?ok[0].u:null;return pcPref;}
 async function pcFetch(path,opt={},cfg){const c=cfg||pcCfg();if(!c.url||!c.key){const e=Error(isAdminUser()?"The PC server is not set up yet. Click the ⚙ button and enter the server URL and keys.":"The admin has not set up the PC server yet.");e.code="NOCFG";throw e;}
-let r;try{r=await fetch(c.url.replace(/\/+$/,"")+path,{...opt,headers:{"X-Key":c.key,...(opt.body?{"Content-Type":"application/json"}:{}),...(opt.headers||{})}});}catch{const e=Error("Cannot reach the PC server. Is your PC on and the Faah Project Server program running?");e.code="NOREACH";throw e;}
-let j=null;try{j=await r.json();}catch{}if(!r.ok){const e=Error((j&&j.error)||(r.status===401?"Wrong server key.":"PC server error "+r.status));e.code="HTTP"+r.status;throw e;}return j;}
+const urls=cfg?[c.url]:(c.urls||[c.url]);if(!cfg&&urls.length>1&&(!pcPref||!urls.includes(pcPref)||Date.now()-lastElect>30000))await pcElect(c);
+const first=(!cfg&&pcPref&&urls.includes(pcPref))?pcPref:urls[0],order=[first,...urls.filter(u=>u!==first)];let r=null;
+for(const u of order){try{r=await pcRaw(u,path,opt,c.key);if(!cfg)pcPref=u;break;}catch{r=null;}}
+if(!r){const e=Error("Cannot reach the PC server. Is your PC on and the Faah Project Server program running?");e.code="NOREACH";if(!cfg)pcPref=null;throw e;}
+let j=null;try{j=await r.json();}catch{}if(!r.ok){const e=Error((j&&j.error)||(r.status===401?"Wrong server key.":"PC server error "+r.status));e.code="HTTP"+r.status;if(j&&j.replica){e.replica=true;lastElect=0;}throw e;}return j;}
 const PC_SQL=`create table if not exists pc_server_config (\n  id int primary key default 1 check (id = 1),\n  url text,\n  view_key text,\n  updated_at timestamptz default now(),\n  updated_by text\n);\nalter table pc_server_config enable row level security;\ndrop policy if exists "pc_server_config_all" on pc_server_config;\ncreate policy "pc_server_config_all" on pc_server_config for all using (true) with check (true);`;
 function showPcConfigSql(){openModal("One-time setup",`<p>This tiny table only stores the PC server address and the read-only view key, so users can sync without typing anything. Project data is never stored online. Run this once in your online database's SQL editor:</p><textarea rows="10" style="width:100%;font-family:monospace" readonly onclick="this.select()">${esc(PC_SQL)}</textarea>`,closeModal);document.getElementById("modalSaveBtn").textContent="Close";}
-function pcApplyCode(v){try{v=v.trim().replace(/^FAAH1:/,"");const j=JSON.parse(atob(v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4)));if(j.u&&j.v&&j.a){document.getElementById("pcUrl").value=j.u;document.getElementById("pcViewKey").value=j.v;document.getElementById("pcAdminKey").value=j.a;const m=document.getElementById("pcTestMsg");m.style.color="#218c5a";m.textContent="Code accepted. Click Save & Test.";}}catch{}}
+function pcApplyCode(v,which){try{v=v.trim().replace(/^FAAH1:/,"");const j=JSON.parse(atob(v.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-v.length%4)%4)));if(j.u&&j.v&&j.a){if(which===2)document.getElementById("pcUrl2").value=j.u;else{document.getElementById("pcUrl").value=j.u;document.getElementById("pcViewKey").value=j.v;document.getElementById("pcAdminKey").value=j.a;}const m=document.getElementById("pcTestMsg");m.style.color="#218c5a";m.textContent=(which===2?"Backup code accepted.":"Main code accepted.")+" Click Save & Test.";}}catch{}}
 async function loadSharedPcConfig(){if(!supabaseClient)return;try{const{data,error}=await supabaseClient.from("pc_server_config").select("url,view_key").eq("id",1).maybeSingle();if(error)throw error;if(data&&data.url&&data.view_key)localStorage.setItem(PCS,JSON.stringify({url:data.url,key:data.view_key}));else localStorage.removeItem(PCS);}catch{}}
-function openPcSettings(){if(!isAdminUser())return;const own=rdJ(PCK),sh=rdJ(PCS);openModal("PC Project Server",`<label>Connection code (from the server program)</label><input id="pcCode" placeholder="FAAH1:…" oninput="pcApplyCode(this.value)"><label>Server URL</label><input id="pcUrl" placeholder="http://192.168.1.10:8765 or https://xxxx.trycloudflare.com" value="${esc(own.url||sh.url||"")}"><label>User key (given to all mentors automatically)</label><input id="pcViewKey" value="${esc(sh.key||"")}"><label>Admin key (stays in this browser only)</label><input id="pcAdminKey" value="${esc(own.key||"")}"><p style="font-size:12px;margin:8px 0 0">Paste the connection code from the Faah Project Server program, or fill the three boxes. Users never type anything; they just click Sync.</p><p id="pcTestMsg" style="font-weight:600"></p>`,async()=>{const g=id=>document.getElementById(id).value.trim(),url=g("pcUrl").replace(/\/+$/,""),vk=g("pcViewKey"),ak=g("pcAdminKey"),msg=document.getElementById("pcTestMsg"),bad=t=>{msg.style.color="#bd3b3b";msg.textContent=t;};
-if(!url||!vk||!ak)return bad("Enter the URL, the view key and the admin key.");
-try{const a=await pcFetch("/ping",{},{url,key:ak});if(a.role!=="admin")return bad("The admin key box does not hold the admin key.");const v=await pcFetch("/ping",{},{url,key:vk});if(v.role!=="user")return bad("The user key box does not hold the user key.");}catch(e){return bad(e.message);}
-localStorage.setItem(PCK,JSON.stringify({url,key:ak}));localStorage.setItem(PCS,JSON.stringify({url,key:vk}));
-try{const{error}=await supabaseClient.from("pc_server_config").upsert({id:1,url,view_key:vk,updated_at:new Date().toISOString(),updated_by:currentUser.full_name||currentUser.username},{onConflict:"id"});if(error)throw error;msg.style.color="#218c5a";msg.textContent="✔ Connected and shared with all users.";}catch(e){return bad("Connected, but not shared with users yet. Run the one-time setup (Setup SQL button), then Save again. "+(e.message||""));}
+function openPcSettings(){if(!isAdminUser())return;const own=rdJ(PCK),sh=rdJ(PCS),us=String(own.url||sh.url||"").split(/[\s,]+/).filter(Boolean);
+openModal("PC Project Server",`<label>1) Main server code (from the main PC's program)</label><input id="pcCode" placeholder="FAAH1:…" oninput="pcApplyCode(this.value)"><label>Main server URL</label><input id="pcUrl" placeholder="http://192.168.1.10:8765 or https://xxxx.trycloudflare.com" value="${esc(us[0]||"")}"><label>User key (given to all mentors automatically)</label><input id="pcViewKey" value="${esc(sh.key||"")}"><label>Admin key (stays in this browser only)</label><input id="pcAdminKey" value="${esc(own.key||"")}"><hr style="margin:12px 0"><label>2) Backup server code (optional — from the backup PC's program)</label><input id="pcCode2" placeholder="FAAH1:…" oninput="pcApplyCode(this.value,2)"><label>Backup server URL</label><input id="pcUrl2" placeholder="http://192.168.1.11:8765 or https://yyyy.trycloudflare.com" value="${esc(us[1]||"")}"><p style="font-size:12px;margin:8px 0 0">Paste the main code in slot 1 and the backup code in slot 2. If the main PC fails, everyone switches to the backup automatically. The backup must be set up with "Make this a backup of it" first, so both servers share the same keys.</p><p id="pcTestMsg" style="font-weight:600"></p>`,async()=>{const g=id=>document.getElementById(id).value.trim(),url=g("pcUrl").replace(/\/+$/,""),url2=g("pcUrl2").replace(/\/+$/,""),vk=g("pcViewKey"),ak=g("pcAdminKey"),msg=document.getElementById("pcTestMsg"),bad=t=>{msg.style.color="#bd3b3b";msg.textContent=t;};
+if(!url||!vk||!ak)return bad("Enter the main server URL, the view key and the admin key.");
+try{const a=await pcFetch("/ping",{},{url,key:ak});if(a.role!=="admin")return bad("The admin key box does not hold the admin key.");const v=await pcFetch("/ping",{},{url,key:vk});if(v.role!=="user")return bad("The user key box does not hold the user key.");}catch(e){return bad("Main server: "+e.message);}
+if(url2){try{const a2=await pcFetch("/ping",{},{url:url2,key:ak}),v2=await pcFetch("/ping",{},{url:url2,key:vk});if(a2.role!=="admin"||v2.role!=="user")throw Error("keys");}catch(e){return bad("The backup server did not accept these keys. On the backup PC click 'Make this a backup of it' with the main server's code first, then save again.");}}
+const both=url2?url+","+url2:url;localStorage.setItem(PCK,JSON.stringify({url:both,key:ak}));localStorage.setItem(PCS,JSON.stringify({url:both,key:vk}));pcPref=null;
+try{const{error}=await supabaseClient.from("pc_server_config").upsert({id:1,url:both,view_key:vk,updated_at:new Date().toISOString(),updated_by:currentUser.full_name||currentUser.username},{onConflict:"id"});if(error)throw error;msg.style.color="#218c5a";msg.textContent=url2?"✔ Main and backup connected and shared with all users.":"✔ Connected and shared with all users.";}catch(e){return bad("Connected, but not shared with users yet. Run the one-time setup (Setup SQL button), then Save again. "+(e.message||""));}
 setTimeout(()=>{closeModal();syncProjects(false);loadOnlineProjects();},1000);});document.getElementById("modalSaveBtn").textContent="Save & Test";}
 const listOnline=()=>pcFetch("/projects"),enc=encodeURIComponent;
 
@@ -700,18 +804,15 @@ Storage.prototype.setItem=function(k,v){rawSet.call(this,k,v);if(this===localSto
 Storage.prototype.removeItem=function(k){rawRem.call(this,k);if(this===localStorage&&isKvKey(k))schedKv();};
 const _saveLocal=save;save=function(){_saveLocal();schedulePush();};
 
-/* --- PC -> your screen (checked every few seconds) */
+/* --- PC -> your screen (Respects hidden list so wiped projects do not auto-reappear) */
 async function refreshUi(){const ov=document.getElementById("modalOverlay"),ae=document.activeElement,typing=Date.now()-lastInput<4000&&ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);if((ov&&!ov.classList.contains("hidden"))||typing){renderPending=true;return;}renderPending=false;const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;try{renderAll();renderQC();}catch(e){console.error(e);}}
-async function pollState(){if(pollBusy||!syncOn())return;pollBusy=true;try{kvUserGuard();await pushDirty();const st=await pcFetch("/state?keys="+enc(kvMap().map(m=>m[1]).join(",")));const online=new Map(st.projects.map(o=>[o.project_name,o])),stamps=getStamps();let changed=false;
-for(const o of st.projects){const n=o.project_name;if(!projects[n]){if(tombed(n))continue;if(await pullProject(n))changed=true;}else if(stamps[n]!==o.version){if(!syncBase[n]){if(await pullProject(n))changed=true;}else if(!isDirty(n)&&await pullProject(n,true))changed=true;}}
+async function pollState(){if(pollBusy||!syncOn())return;pollBusy=true;try{kvUserGuard();await pushDirty();const st=await pcFetch("/state?keys="+enc(kvMap().map(m=>m[1]).join(",")));const online=new Map(st.projects.map(o=>[o.project_name,o])),stamps=getStamps();const hidden=getHiddenProjects();let changed=false;
+for(const o of st.projects){const n=o.project_name;if(hidden.has(n))continue;if(!projects[n]){if(tombed(n))continue;if(await pullProject(n))changed=true;}else if(stamps[n]!==o.version){if(!syncBase[n]){if(await pullProject(n))changed=true;}else if(!isDirty(n)&&await pullProject(n,true))changed=true;}}
 for(const n of Object.keys(projects)){if(stamps[n]&&!online.has(n)&&!tombed(n)&&!isDirty(n)){delete projects[n];forget(n);changed=true;}}
 if(changed){_saveLocal();renderPending=true;}if(await pollKv(st.kv))renderPending=true;setSyncLabel("live");if(renderPending)await refreshUi();}catch(e){setSyncLabel("offline");if(Date.now()-lastCfgTry>30000){lastCfgTry=Date.now();await loadSharedPcConfig();}}finally{pollBusy=false;}}
-async function syncProjects(manual){await loadSharedPcConfig();if(!pcCfg().url){if(manual){if(isAdminUser())openPcSettings();else showStatusPopup("Not Set Up","The admin has not set up the PC server yet.");}return;}await pollState();if(manual)showStatusPopup(liveState==="offline"?"Offline":"Synced",liveState==="offline"?"Could not reach the PC server. Your work is safe in this browser and is sent automatically when it is back.":"Your work is saved on the PC and this screen is up to date.");}
+async function syncProjects(manual){await loadSharedPcConfig();if(!pcCfg().url){if(manual){if(isAdminUser())openPcSettings();else showStatusPopup("Not Set Up","The admin has not set up the PC server yet.");}return;}if(manual)unhideAllShared();await pollState();if(manual)showStatusPopup(liveState==="offline"?"Offline":"Synced",liveState==="offline"?"Could not reach the PC server. Your work is safe in this browser and is sent automatically when it is back.":"Your work is saved on the PC and this screen is up to date.");}
 function startLive(){if(liveStarted)return;liveStarted=true;document.addEventListener("input",()=>{lastInput=Date.now();},true);setInterval(()=>{if(!document.hidden)pollState();},5000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)pollState();});window.addEventListener("focus",()=>pollState());
-window.addEventListener("pagehide",()=>{try{const c=pcCfg();if(!syncOn())return;const base=c.url.replace(/\/+$/,""),hd={"X-Key":c.key,"Content-Type":"application/json"};for(const n of Object.keys(projects)){const d=diffProject(n);if(!d||!d.dirty)continue;const body=JSON.stringify({upserts:d.upserts,deletes:d.deletes,base_version:getStamps()[n]||"",epoch:getEpochs()[n]||"",updated_by:currentUser.full_name||currentUser.username});if(body.length<60000)fetch(base+"/projects/"+enc(n),{method:"PATCH",keepalive:true,headers:hd,body});}}catch{}});}
-
-/* mentors cannot delete shared projects */
-const _dp=deleteProject;deleteProject=function(){if(pcCfg().url&&!isAdminUser()&&getStamps()[project()])return showStatusPopup("Admin Only","This project is shared through the PC server. Only an admin can delete it.");return _dp.apply(this,arguments);};
+window.addEventListener("pagehide",()=>{try{const c=pcCfg();if(!syncOn())return;const base=(pcPref||c.url).replace(/\/+$/,""),hd={"X-Key":c.key,"Content-Type":"application/json"};for(const n of Object.keys(projects)){const d=diffProject(n);if(!d||!d.dirty)continue;const body=JSON.stringify({upserts:d.upserts,deletes:d.deletes,base_version:getStamps()[n]||"",epoch:getEpochs()[n]||"",updated_by:currentUser.full_name||currentUser.username});if(body.length<60000)fetch(base+"/projects/"+enc(n),{method:"PATCH",keepalive:true,headers:hd,body});}}catch{}});}
 
 async function pushProjectsOnline(){const msg=document.getElementById("onlineMsg");if(!isAdminUser())return alert("Only an admin can send projects to the PC.");const names=Object.keys(projects);if(!names.length)return msg.textContent="No projects in this browser to send.";if(!confirm(`Send ${names.length} project(s) to the PC server? Projects with the same name on the PC server will be replaced.`))return;try{msg.textContent="Sending...";const n=await pushNames(names);msg.textContent=`${n} project(s) saved on the PC.`;loadOnlineProjects();}catch(e){msg.textContent=e.message;}}
 async function loadOnlineProjects(){const body=document.getElementById("onlineBody"),msg=document.getElementById("onlineMsg");if(!body)return;try{const list=await listOnline();body.innerHTML=list.map(o=>`<tr><td>${esc(o.project_name)}</td><td>${o.part_count||0}</td><td>${esc(o.updated_at||"—")}</td><td>${esc(o.updated_by||"—")}</td><td><button class="blue" onclick="pullOne('${enc(o.project_name)}')">Load here</button> <button class="red" onclick="deleteOnline('${enc(o.project_name)}')">Delete on PC</button></td></tr>`).join("")||'<tr><td colspan="5">No projects on the PC server yet.</td></tr>';msg.textContent="";}catch(e){body.innerHTML="";msg.textContent=e.message;}}
@@ -728,39 +829,33 @@ async function autoPushProject(name){if(!isAdminUser())return;let text,bad=false
 for(let i=0;i<25;i++){const mt=document.getElementById("modalTitle"),mb=document.getElementById("modalBody");if(mt&&mt.textContent==="Parts Imported"&&mb&&mb.textContent.includes(name)){const p=document.createElement("p");p.textContent=text;p.style.fontWeight="600";p.style.color=bad?"#bd3b3b":"#218c5a";mb.append(p);return;}await new Promise(r=>setTimeout(r,200));}if(bad)alert(text);}
 async function removeOnline(names){names.forEach(n=>tomb.set(n,Date.now()));if(!isAdminUser()||!names.length||!pcCfg().url)return;for(const n of names){try{await pcFetch("/projects/"+enc(n),{method:"DELETE"});forget(n);}catch(e){alert(`Deleted here, but '${n}' could not be deleted on the PC: `+(e.message||e));return;}}}
 async function renameOnline(oldName,newName){tomb.set(oldName,Date.now());if(!isAdminUser()||!getStamps()[oldName])return;try{await pushNames([newName]);await pcFetch("/projects/"+enc(oldName),{method:"DELETE"});forget(oldName);}catch(e){alert("Renamed here, but the PC copy could not be renamed: "+(e.message||e));}}
+</script>
+<script>
+/* ===== Per-user scoping: every user sees only their own Done parts, production summary and submissions ===== */
+const canSeeAllWork=()=>isAdminUser()||roleKey()==="teamleader",mineOnly=()=>!canSeeAllWork();
 
-function flushDirtyNow(names){ schedulePush(0); }
-function hideShared(names){}
+/* Production Summary + Ontest counts: ONLY this user's done parts (never other mentors') */
+function doneEntryCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).reduce((t,r)=>t+(+r.entry||0),0);}
+function donePartsCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).length;}
 
-/* Yes/No popup for Delete All, and keep production summary */
-const _openModalYN=openModal;
-openModal=function(...a){
-  _openModalYN(...a);
-  const c=document.querySelector("#modalOverlay .toolbar button:first-child");
-  if(c)c.textContent="Cancel";
-};
+/* Status Manager + Done Parts List: normal users are locked to "My Mentor Work" */
+const _renderAllScoped=renderAll;
+renderAll=function(){if(mineOnly()){const s=document.getElementById("statusMentorFilter");if(s)s.value="mine";}return _renderAllScoped.apply(this,arguments);};
 
-deleteAllProjectExcel=function(){
-  const names=Object.keys(projects);
-  if(!names.length)return showStatusPopup("No Projects","There are no uploaded projects to delete.");
-  const admin=String(currentUser?.role||"").toLowerCase()==="admin";
-  openModal("Wipe out all projects?",
-    `<p><b>Do you want to wipe out ALL ${names.length} project${names.length===1?"":"s"}?</b></p>`+
-    (admin?"<p>They will also be deleted from the PC server.</p>"
-          :(pcCfg().url?"<p>Shared projects stay on the PC server. Click ☁ Sync Projects to bring them back.</p>":""))+
-    "<p>Your production summary and submitted history are NOT deleted.</p>",
-    ()=>{
-      if(admin)removeOnline(names);
-      else{flushDirtyNow(names);hideShared(names);}
-      try{localStorage.setItem(productionDraftKey(),JSON.stringify(productionRows));}catch{}
-      projects={};save();productionRows=[];productionProjectKey="";
-      document.getElementById("projectSelect").innerHTML="";
-      closeModal();renderAll();
-      showStatusPopup("Projects Deleted",`${names.length} project${names.length===1?"":"s"} wiped out.`);
-    });
-  document.getElementById("modalSaveBtn").textContent="Yes";
-  document.querySelector("#modalOverlay .toolbar button:first-child").textContent="No";
-};
+/* Mentor Summary tab (monthly summary, charts, submission list) is open to everyone: all mentors see all work */
+const _renderHistoryAll=renderMonthlyHistory;
+renderMonthlyHistory=function(){const s=document.getElementById("historyOwnFilter");if(s&&!s.dataset.init){s.dataset.init="1";s.value="all";}return _renderHistoryAll.apply(this,arguments);};
+
+function applyUserScopeUI(){
+  const hide=mineOnly();
+  ["statusMentorFilter"].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.style.display=hide?"none":"";
+    const lab=el.closest("label")||document.querySelector(`label[for="${id}"]`);if(lab)lab.style.display=hide?"none":"";
+  });
+}
+const _enterAppScoped=enterApp;
+enterApp=async function(){await _enterAppScoped();applyUserScopeUI();renderAll();renderMonthlyHistory();};
 </script>
 </body>
 </html>
