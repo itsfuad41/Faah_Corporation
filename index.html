@@ -45,12 +45,162 @@
   <div id="app" class="hidden">
     <header><div class="actions"><span class="brand">Mentor Workstation By Fuad</span><label for="projectSelect">Project</label><select id="projectSelect" onchange="renderAll()"></select><button class="blue" onclick="openRenameProject()">Rename Project</button><button onclick="renderAll()">Refresh</button><button class="blue" onclick="exportCurrentTabToCSV()">Export Tab to CSV</button><button class="green" onclick="document.getElementById('excelInput').click()">Upload Excel</button><input id="excelInput" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.ods,.csv" class="hidden" multiple onchange="uploadChosenExcels(event)"><button id="syncBtn" class="blue" onclick="syncProjects(true)">☁ Sync Projects</button><button id="pcCfgBtn" class="blue hidden" onclick="openPcSettings()" title="PC server settings (admin)">⚙</button><div class="profile-wrap" id="projectMenuWrap"><button type="button" class="amber" onclick="toggleProjectMenu(event)">Delete Project ▾</button><div id="projectMenu" class="profile-menu hidden" role="menu"><button type="button" role="menuitem" onclick="closeProjectMenu();deleteProject()">Delete Project</button><button type="button" role="menuitem" onclick="closeProjectMenu();deleteAllProjectExcel()">Delete All Projects</button></div></div></div><div class="profile-actions"><div class="profile-wrap"><button id="profileButton" class="profile-trigger" aria-haspopup="menu" aria-expanded="false" onclick="toggleProfileMenu(event)"><span class="profile-copy"><span id="userName" class="profile-name"></span><span id="userRole" class="profile-role"></span></span><span id="userAvatar" class="profile-avatar" aria-hidden="true"></span></button><div id="profileMenu" class="profile-menu hidden" role="menu"><button type="button" role="menuitem" onclick="closeProfileMenu();openAccountDetails()">Account Details</button><button type="button" role="menuitem" onclick="closeProfileMenu();openChangePassword()">Change Password</button></div></div><button onclick="logout()">Logout</button></div></header>
     <main>
-      <nav class="tabs"><button class="tab-btn active" onclick="showTab('reports',this)">Project Reports</button><button class="tab-btn" onclick="showTab('active',this)">Active Parts</button><button class="tab-btn" onclick="showTab('series',this)">Series Summary</button><button class="tab-btn" onclick="showTab('mentor',this)">Mentor Workstation</button><button class="tab-btn" onclick="showTab('summary',this)">Mentor Summary</button><button id="qcTabButton" class="tab-btn hidden" onclick="showTab('qcws',this)">QC Workstation</button><button id="adminButton" class="tab-btn hidden" onclick="showTab('admin',this)">Admin</button></nav>
+      <nav class="tabs"><button class="tab-btn active" onclick="showTab('reports',this)">Project Reports</button><button class="tab-btn" onclick="showTab('active',this)">Active Parts</button><button class="tab-btn" onclick="showTab('series',this)">Series Summary</button><button class="tab-btn" onclick="showTab('todayOntest',this)" style="background:#fff6d8;color:#b45309;font-weight:700">Today OnTest</button><button class="tab-btn" onclick="showTab('mentor',this)">Mentor Workstation</button><button class="tab-btn" onclick="showTab('summary',this)">Mentor Summary</button><button id="qcTabButton" class="tab-btn hidden" onclick="showTab('qcws',this)">QC Workstation</button><button id="adminButton" class="tab-btn hidden" onclick="showTab('admin',this)">Admin</button></nav>
+      
       <section id="reports" class="panel active"><div class="subtabs"><button onclick="toggleReport('reportSummary')">Summary Report</button><button onclick="toggleReport('reportDetails')">Detailed Parts List</button></div><div id="reportSummary" class="surface"><table><thead><tr><th>#</th><th>Mentor</th><th>Operators</th><th>Entry</th><th>EntryComplete</th><th>Series</th><th>Remaining</th></tr></thead><tbody id="reportBody"></tbody></table></div><div id="reportDetails" class="surface hidden"><table><thead><tr><th>#</th><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th><th>Comment</th></tr></thead><tbody id="detailBody"></tbody></table></div></section>
+      
       <section id="active" class="panel"><div class="toolbar" style="margin-bottom:8px"><label for="activeMentorFilter">Mentor</label><select id="activeMentorFilter" onchange="filterActiveParts()"><option value="">All Mentors</option></select></div><div class="surface"><table><thead><tr><th>Op.ID</th><th>Name</th><th>Series</th><th>Start</th><th>End</th><th>Images</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th></tr></thead><tbody id="activeBody"></tbody></table></div></section>
+      
       <section id="series" class="panel"><span class="metric" id="totalMetric">Total Series: 0</span><span class="metric green" id="readyMetric">Ready for Process: 0</span><span class="metric amber" id="pendingMetric">Remaining Entry + EntryComplete: 0</span><span class="series-quick"><button id="readyFilterBtn" onclick="cycleReadyFilter()">Ready For Process: All</button><button id="distDoneFilterBtn" onclick="cycleDistDoneFilter()">Dist Done: All</button></span><div class="series-layout"><div class="surface"><table><thead><tr><th>#</th><th><button id="seriesSortDirection" onclick="sortSeriesList()" aria-label="Sort series A to Z">Series Number (A-Z)</button></th><th>Total Entry Count</th><th>Image Count (T.Img)</th><th>Process Status</th><th>Dist Status</th><th>Mentor And Part For Remaining Series</th></tr></thead><tbody id="seriesBody"></tbody></table></div><aside class="series-filter"><strong>Filter Series List</strong><textarea id="seriesFilterInput" placeholder="Paste series numbers here, one per line"></textarea><button class="green" onclick="filterSeriesList()" style="width:100%;margin-top:6px">Filter Series List</button><button onclick="clearSeriesFilter()" style="width:100%;margin-top:5px">Clear Filter</button></aside></div></section>
-      <section id="mentor" class="panel"><div class="subtabs" id="mentorSubtabs"><button class="tab-btn active" onclick="showMentorView('operatorsView',this)">Operators</button><button class="tab-btn" onclick="showMentorView('statusView',this)">Series Status Manager (Entry &amp; EntryComplete)</button><button class="tab-btn" onclick="showMentorView('productionView',this)">Production Summary (All Projects)</button><button class="tab-btn" onclick="showMentorView('doneView',this)">Done Parts List</button></div><div id="operatorsView" class="hidden"><p id="mentorOperatorsCaption" style="margin:4px 0 8px">Your Operators — active operators assigned to your Supabase mentor account.</p><div class="surface"><table><thead><tr><th>Operator ID</th><th>Name</th><th>Status</th><th>Active Projects (Entry + EntryComplete)</th></tr></thead><tbody id="operatorBody"></tbody></table></div><div class="toolbar"><button onclick="loadMentorOperators()">Refresh</button><button class="green" onclick="openAddMentorOperator()">Add New Operator</button><button class="amber" onclick="setSelectedMentorOperatorInactive()">Set Selected to Inactive</button><button onclick="openInactiveMentorOperators()">View Inactive Operators</button></div></div><div id="statusView"><div class="toolbar"><label for="statusMentorFilter">Show Parts</label><select id="statusMentorFilter" onchange="renderAll()"><option value="mine">My Mentor Work</option><option value="all">All Mentors</option></select><button class="green" onclick="updateSelected('Done')">Mark Done</button><button class="blue" onclick="updateSelected('Running')">Running</button><button class="amber" onclick="updateSelected('Reject')">Reject</button><button class="red" onclick="deleteSelected()">Delete Selected</button></div><div class="surface"><table><thead><tr><th><input type="checkbox" onchange="selectAll(this)"></th><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th><th>Series Remaining</th><th>Comment</th></tr></thead><tbody id="statusBody"></tbody></table></div></div><div id="doneView" class="hidden"><div class="surface"><table><thead><tr><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th><th>Action</th></tr></thead><tbody id="doneBody"></tbody></table></div></div><div id="productionView" class="hidden"><h3>Production Summary — All Projects</h3><div class="toolbar"><label>Report Date <input type="date" id="workDate"></label><label>Comments (All Projects) <input id="workComment" value="Mentor & Dist."></label><button onclick="applyProductionDefaults()">Apply Date &amp; Comment to All Projects</button></div><div class="toolbar" style="justify-content:flex-end"><button class="green" onclick="addProductionRow()">＋ Add Row</button><button onclick="renderProduction(true)">Refresh</button></div><div class="surface"><table><thead><tr><th>Mentor Name</th><th>Project</th><th>Work Date</th><th>Production Count</th><th>Ontest Data Count</th><th>Comment</th></tr></thead><tbody id="productionBody"></tbody></table></div><div class="production-total" id="productionTotal">Total Ontest Data Count (All Projects): 0</div><div class="toolbar"><button class="green" onclick="saveProductionSummary()">Save Summary</button><button class="blue" onclick="submitProduction()">Submit to Cloud</button><button class="amber" onclick="viewSavedSummary()">View Saved Summary</button></div></div></section>
+      
+      <!-- TODAY ONTEST: Live Cluster Progress & Filters -->
+      <section id="todayOntest" class="panel">
+        <div class="toolbar" style="margin-bottom:10px;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <label><strong>Scope:</strong> 
+              <select id="ontestDateScope" onchange="toggleOntestDateMode()">
+                <option value="today" selected>Today Only</option>
+                <option value="all">All Dates</option>
+                <option value="custom">Custom Date</option>
+              </select>
+            </label>
+            <input type="date" id="ontestDateInput" onchange="renderTodayOntest()" style="display:none">
+            <label><strong>Project:</strong> <select id="ontestProjScope" onchange="renderTodayOntest()"><option value="">All Projects</option></select></label>
+            <label><strong>Mentor:</strong> <select id="ontestMentorScope" onchange="renderTodayOntest()"><option value="">All Mentors</option><option value="mine">My Work Only</option></select></label>
+            <label><strong>Entry Count:</strong> 
+              <select id="ontestEntryMinFilter" onchange="renderTodayOntest()">
+                <option value="0">All Entries</option>
+                <option value="1">Entry &gt; 0</option>
+                <option value="50">Entry &ge; 50</option>
+                <option value="100">Entry &ge; 100</option>
+                <option value="200">Entry &ge; 200</option>
+              </select>
+            </label>
+            <label><strong>Done Parts:</strong> 
+              <select id="ontestPartsMinFilter" onchange="renderTodayOntest()">
+                <option value="0">All Counts</option>
+                <option value="1">&ge; 1 Part</option>
+                <option value="5">&ge; 5 Parts</option>
+                <option value="10">&ge; 10 Parts</option>
+              </select>
+            </label>
+            <button onclick="renderTodayOntest()">🔄 Refresh</button>
+            <button class="green" onclick="exportTodayOntestToExcel()">Export Excel</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span class="metric green" id="todayOntestPartsTotal">Done Parts: 0</span>
+            <span class="metric amber" id="todayOntestEntryTotal">Total Entry: 0</span>
+          </div>
+        </div>
+
+        <div class="subtabs" id="ontestSubtabs">
+          <button class="tab-btn active" onclick="showOntestView('ontestProjectView',this)">Project-wise Breakdown</button>
+          <button class="tab-btn" onclick="showOntestView('ontestMentorView',this)">Mentor-wise Breakdown</button>
+          <button class="tab-btn" onclick="showOntestView('ontestDetailView',this)">Itemized Done Parts List</button>
+        </div>
+
+        <div id="ontestProjectView">
+          <div class="surface">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Project Name</th><th>Mentors Active</th><th>Done Parts Count</th><th>Total Entry Count</th><th>Avg Entry / Part</th></tr>
+              </thead>
+              <tbody id="ontestProjectBody"></tbody>
+              <tfoot id="ontestProjectFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div id="ontestMentorView" class="hidden">
+          <div class="surface">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Mentor Name</th><th>Projects Worked</th><th>Done Parts Count</th><th>Total Entry Count</th><th>Entry Share %</th></tr>
+              </thead>
+              <tbody id="ontestMentorBody"></tbody>
+              <tfoot id="ontestMentorFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div id="ontestDetailView" class="hidden">
+          <div class="toolbar" style="margin-bottom:8px">
+            <input id="ontestDetailSearch" placeholder="Search Op.ID, Series, Name, Project, Mentor..." oninput="filterTodayOntestDetails()" style="min-width:280px">
+            <span id="ontestDetailCountInfo" style="font-weight:600;color:var(--navy);margin-left:8px"></span>
+          </div>
+          <div class="surface">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Project</th><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry Count</th><th>Dist Date</th><th>Done Time</th><th>Mentor</th><th>Done By</th><th>Comment</th><th>Action</th></tr>
+              </thead>
+              <tbody id="ontestDetailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- MENTOR WORKSTATION: Live Work Done by Mentor -->
+      <section id="mentor" class="panel">
+        <div class="subtabs" id="mentorSubtabs">
+          <button class="tab-btn active" onclick="showMentorView('operatorsView',this)">Operators</button>
+          <button class="tab-btn" onclick="showMentorView('statusView',this)">Series Status Manager (Entry &amp; EntryComplete)</button>
+          <button class="tab-btn" onclick="showMentorView('productionView',this)">Production Summary (All Projects)</button>
+          <button class="tab-btn" onclick="showMentorView('doneView',this)">Done Parts List</button>
+        </div>
+
+        <div id="operatorsView" class="hidden">
+          <p id="mentorOperatorsCaption" style="margin:4px 0 8px">Your Operators — active operators assigned to your Supabase mentor account.</p>
+          <div class="surface"><table><thead><tr><th>Operator ID</th><th>Name</th><th>Status</th><th>Active Projects (Entry + EntryComplete)</th></tr></thead><tbody id="operatorBody"></tbody></table></div>
+          <div class="toolbar"><button onclick="loadMentorOperators()">Refresh</button><button class="green" onclick="openAddMentorOperator()">Add New Operator</button><button class="amber" onclick="setSelectedMentorOperatorInactive()">Set Selected to Inactive</button><button onclick="openInactiveMentorOperators()">View Inactive Operators</button></div>
+        </div>
+
+        <!-- Status View: Live Work Done by Mentor in this project -->
+        <div id="statusView">
+          <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="metric green" id="statusMyDoneParts">My Done Parts: 0</span>
+            <span class="metric amber" id="statusMyDoneEntry">My Done Entry: 0</span>
+            <span class="metric" id="statusMyPendingParts" style="background:#506d83">My Pending Parts: 0</span>
+          </div>
+          <div class="toolbar">
+            <label for="statusMentorFilter">Show Parts</label>
+            <select id="statusMentorFilter" onchange="renderAll()"><option value="mine">My Mentor Work</option><option value="all">All Mentors</option></select>
+            <button class="green" onclick="updateSelected('Done')">Mark Done</button>
+            <button class="blue" onclick="updateSelected('Running')">Running</button>
+            <button class="amber" onclick="updateSelected('Reject')">Reject</button>
+            <button class="red" onclick="deleteSelected()">Delete Selected</button>
+          </div>
+          <div class="surface"><table><thead><tr><th><input type="checkbox" onchange="selectAll(this)"></th><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th><th>Series Remaining</th><th>Comment</th></tr></thead><tbody id="statusBody"></tbody></table></div>
+        </div>
+
+        <div id="doneView" class="hidden">
+          <div class="toolbar" style="margin-bottom:8px">
+            <span class="metric green" id="doneTabCountMetric">My Done Parts: 0</span>
+            <span class="metric amber" id="doneTabEntryMetric">My Total Entry: 0</span>
+            <label>Filter Date: <select id="doneTabDateFilter" onchange="renderAll()"><option value="all">All Dates</option><option value="today" selected>Today Only</option></select></label>
+          </div>
+          <div class="surface"><table><thead><tr><th>Op.ID</th><th>Name</th><th>Series</th><th>Entry</th><th>Status</th><th>Dist Date</th><th>Mentor</th><th>Action</th></tr></thead><tbody id="doneBody"></tbody></table></div>
+        </div>
+
+        <div id="productionView" class="hidden">
+          <h3>Production Summary — All Projects</h3>
+          <div class="toolbar">
+            <label>Report Date <input type="date" id="workDate"></label>
+            <label>Comments (All Projects) <input id="workComment" value="Mentor & Dist."></label>
+            <button onclick="applyProductionDefaults()">Apply Date &amp; Comment to All Projects</button>
+          </div>
+          <div class="toolbar" style="justify-content:flex-end">
+            <button class="green" onclick="addProductionRow()">＋ Add Row</button>
+            <button onclick="renderProduction(true)">Refresh</button>
+            <button class="red" onclick="resetMyDailyProduction()">Fresh Start Today (Reset)</button>
+          </div>
+          <div class="surface"><table><thead><tr><th>Mentor Name</th><th>Project</th><th>Work Date</th><th>Production Count</th><th>Ontest Data Count</th><th>Comment</th></tr></thead><tbody id="productionBody"></tbody></table></div>
+          <div class="production-total" id="productionTotal">Total Ontest Data Count (All Projects): 0</div>
+          <div class="toolbar"><button class="green" onclick="saveProductionSummary()">Save Summary</button><button class="blue" onclick="submitProduction()">Submit to Cloud</button><button class="amber" onclick="viewSavedSummary()">View Saved Summary</button></div>
+        </div>
+      </section>
+      
       <section id="summary" class="panel"><div class="subtabs"><button onclick="showSummaryView('pivotView')">Mentor Monthly Production Summary</button><button onclick="showSummaryView('historyView')">Monthly Submission</button></div><div id="pivotView"><div class="toolbar" style="margin-bottom:8px"><label>Select Month <select id="summaryMonth"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></label><label>Select Year <input id="summaryYear" type="number" style="width:90px"></label><button onclick="loadMonthlyPivot()">Refresh Monthly Report</button><button class="green" onclick="exportMonthlyPivot()">Export to Excel</button><span class="sum-filters"><span class="ms-wrap"><button type="button" id="mentorMsBtn" class="ms-btn">All Mentors ▾</button><div id="mentorMsPanel" class="ms-panel hidden"><input id="mentorMsSearch" placeholder="Search mentor…" autocomplete="off"><label class="ms-item ms-all"><input type="checkbox" id="mentorMsAll" checked> All Mentors</label><div id="mentorMsList" class="ms-list"></div></div></span><label>From Date <input type="date" id="summaryFrom"></label><label>To Date <input type="date" id="summaryTo"></label><button type="button" id="summaryDateClear" class="hidden" style="padding:7px 10px">Clear Dates</button><span class="sum-box prod" title="Sum of production for the selected dates (or the whole month)">Production Data: <b id="sumProdTotal">0</b></span><span class="sum-box ont" title="Sum of ontest for the selected dates (or the whole month)">Ontest Data: <b id="sumOntestTotal">0</b></span></span></div><div class="surface"><table><thead><tr id="pivotHeadRow"><th>#</th><th>Mentor Name</th><th>Metric</th></tr></thead><tbody id="pivotBody"></tbody></table></div></div><div id="historyView" class="hidden"><div class="charts"><div class="chart"><h3>Production by Mentor</h3><div class="chart-content"><canvas id="productionChart"></canvas><ul id="productionLegend" class="chart-legend"></ul></div></div><div class="chart"><h3>Ontest by Mentor</h3><div class="chart-content"><canvas id="ontestChart"></canvas><ul id="ontestLegend" class="chart-legend"></ul></div></div></div><h3>Monthly Submission History</h3><div class="toolbar"><label>Month <select id="historyMonth" onchange="renderMonthlyHistory()"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></label><label>Year <input id="historyYear" type="number" style="width:90px" onchange="renderMonthlyHistory()"></label><label>Show <select id="historyOwnFilter" onchange="renderMonthlyHistory()"><option value="all">All submissions</option><option value="mine">My submissions</option></select></label><button onclick="renderMonthlyHistory()">Refresh Monthly History</button><span id="historyTotals" class="metric"></span><button id="historyUploadBtn" class="green hidden" onclick="document.getElementById('historyExcelInput').click()">Upload Excel (Admin)</button><input id="historyExcelInput" type="file" accept=".xlsx,.xls,.xlsm,.csv" class="hidden" onchange="handleSubmissionExcel(event)"></div><div class="surface"><table><thead><tr><th>Mentor</th><th>Project</th><th>Date</th><th>Production</th><th>Ontest Data Count</th><th>Comment</th><th>Actions</th></tr></thead><tbody id="monthlyBody"></tbody></table></div></div></section>
+      
       <section id="qcws" class="panel"><div class="subtabs"><button onclick="qcView('qcA')">Process/QA Series</button><button onclick="qcView('qcB')">Process Complete List</button><button onclick="qcView('qcC')">QC Daily Summary</button></div>
 <div id="qcA"><div class="surface" style="max-height:none;overflow:visible;padding:12px"><b>Bulk Series Lookup / Custom Paste</b><textarea id="qcBulkInput" rows="3" placeholder="Paste Series Numbers here (one per line)..." style="width:100%;margin:6px 0"></textarea><div class="toolbar"><button class="green" onclick="qcProcessBulk()">Process Pasted Series</button><button class="blue" onclick="renderQC()">🔄 Refresh QA List</button></div></div>
 <div class="surface"><table><thead><tr><th></th><th>Project Name</th><th>Series Number</th><th>T. Entry</th><th>Image</th><th>Series Status</th><th>Reject Comment</th></tr></thead><tbody id="qcBulkBody"></tbody></table></div>
@@ -60,6 +210,7 @@
 <div id="qcC" class="hidden"><div class="surface" style="max-height:none;overflow:visible;padding:12px"><div class="toolbar"><input id="qcInf" placeholder="Card NO (INF-ID) e.g. INF0014"><input id="qcDate" type="date"><input id="qcTeam" list="qcTeams" placeholder="Team"><datalist id="qcTeams"><option>Mirpur</option><option>Uttara</option><option>Dhanmondi</option><option>Badda</option></datalist><input id="qcType" list="qcTypes" placeholder="Type" value="Process"><datalist id="qcTypes"><option>Process</option><option>QA</option></datalist><input id="qcComments" placeholder="Comments" style="min-width:220px"></div>
 <div class="toolbar" style="margin-top:8px"><button class="green" onclick="qcGenerate()">Generate Summary for Selected Date</button><button class="blue" onclick="qcExport()">Export Summary to Excel</button><button class="red" onclick="document.getElementById('qcSumBody').innerHTML=''">Clear Table</button></div></div>
 <div class="surface"><table id="qcSumTable"><thead id="qcSumHead"></thead><tbody id="qcSumBody"></tbody></table></div><small>Double-click any cell to edit it before exporting.</small></div></section>
+      
       <section id="admin" class="panel">
         <div class="subtabs"><button onclick="showAdminView('usersView')">Users Details</button><button onclick="showAdminView('opsView')">Operators Details</button><button onclick="showAdminView('localView')">PC Project Server</button></div>
         <div id="usersView">
@@ -102,14 +253,50 @@
     const SUPABASE_URL="https://xupzriltfvznmaelixft.supabase.co",SUPABASE_KEY="sb_publishable_rS81a0VMt3tIsqJU9UYKqA_niXFN-gS",supabaseClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false}}),nativeAlert=window.alert.bind(window);window.alert=message=>nativeAlert(String(message??"").replace(/supabase/gi,"cloud service"));
     const db=new Dexie("faah_mentor_local.db");db.version(1).stores({series_parts:"++id, project_name, series_number, op_id, mentor_name, status, start_img"});db.version(2).stores({series_parts:"++id, project_name, series_number, op_id, mentor_name, status, start_img",upload_history:"++id, project_name, uploaded_at, row_count",work_history:"++id, mentor_name, project_name, work_date"});
     let currentUser=null,projects={},productionChart=null,ontestChart=null,productionRows=[],productionProjectKey="",monthlyHistoryRows=[],historyPeriodInitialized=false;const esc=v=>String(v??"").replace(/supabase/gi,"cloud service").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c])),norm=v=>String(v||"").toLowerCase().replace(/[-_ ]/g,""),project=()=>document.getElementById("projectSelect").value,parts=()=>projects[project()]||[];
-    window.addEventListener("DOMContentLoaded",async()=>{const today=new Date(),todayIso=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById("workDate").value=todayIso;document.getElementById("summaryMonth").value=today.getMonth()+1;document.getElementById("summaryYear").value=today.getFullYear();document.getElementById("historyMonth").value=today.getMonth()+1;document.getElementById("historyYear").value=today.getFullYear();const cached=sessionStorage.getItem("faah_current_user");if(cached){currentUser=JSON.parse(cached);await enterApp();}});
+    
+    function getTodayIso(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function numVal(v){
+      if(v===null||v===undefined||v==="")return 0;
+      const n = Number(String(v).replace(/,/g,"").trim());
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    window.addEventListener("DOMContentLoaded",async()=>{
+      const todayIso = getTodayIso();
+      document.getElementById("workDate").value=todayIso;
+      const ontestDt = document.getElementById("ontestDateInput");
+      if(ontestDt) ontestDt.value = todayIso;
+      const today=new Date();
+      document.getElementById("summaryMonth").value=today.getMonth()+1;
+      document.getElementById("summaryYear").value=today.getFullYear();
+      document.getElementById("historyMonth").value=today.getMonth()+1;
+      document.getElementById("historyYear").value=today.getFullYear();
+      const cached=sessionStorage.getItem("faah_current_user");
+      if(cached){currentUser=JSON.parse(cached);await enterApp();}
+    });
+
     async function handleLogin(e){e.preventDefault();const username=document.getElementById("loginUsername").value.trim().toLowerCase(),password=document.getElementById("loginPassword").value.trim(),button=document.getElementById("loginButton"),errorBox=document.getElementById("loginError");errorBox.textContent="";button.disabled=true;button.textContent="Verifying...";try{if(!supabaseClient)throw Error("Cloud service could not be loaded.");const{data:user,error}=await supabaseClient.from("system_users").select("username,password,role,full_name,is_active").ilike("username",username).limit(1).maybeSingle();if(error)throw error;if(!user)throw Error("User not found.");if(user.is_active===false||String(user.is_active).toLowerCase()==="0")throw Error("This account is inactive.");if(String(user.password||"").trim()!==password)throw Error("Invalid username or password.");currentUser=user;sessionStorage.setItem("faah_current_user",JSON.stringify(user));await enterApp();}catch(error){errorBox.textContent=String(error.message||"Unable to connect to the cloud service.").replace(/supabase/gi,"cloud service");button.disabled=false;button.textContent="Sign In";}}
-    async function enterApp(){document.getElementById("loginScreen").classList.add("hidden");document.getElementById("app").classList.remove("hidden");const displayName=currentUser.full_name||currentUser.username||"User",nameParts=displayName.trim().split(/\s+/),initials=nameParts.slice(0,2).map(part=>part[0]||"").join("").toUpperCase();document.getElementById("userName").textContent=displayName;document.getElementById("userRole").textContent=String(currentUser.role||"Mentor").replace(/\b\w/g,letter=>letter.toUpperCase());document.getElementById("userAvatar").textContent=initials||"F";document.getElementById("mentorOperatorsCaption").textContent="Your Operators — active operators assigned to your mentor account.";document.getElementById("adminButton").classList.toggle("hidden",String(currentUser.role||"").toLowerCase()!=="admin");applyRoleUI();await loadProjects();await loadCloud();renderAll();renderQC();}
-    async function loadProjects(){try{projects=JSON.parse(localStorage.getItem("MW_PROJECTS_V2")||"{}");}catch{projects={};}if(!Object.keys(projects).length&&localStorage.getItem("MW_PROJECTS_V2_EMPTY")!=="1"){const old=await db.series_parts.toArray();old.forEach(r=>{const key=r.project_name||"Imported Project";(projects[key]??=[]).push({opId:String(r.op_id||""),name:r.full_name||"",seriesNo:String(r.series_number||""),startImg:r.start_img||"",endImg:r.end_img||"",disImg:+r.dis_img||0,tImg:+r.t_img||0,entry:+r.entry_count||0,status:r.status||"Entry",mentorName:r.mentor_name||"Unassigned",comment:r.qc_reject_comment||""});});save();}const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;await syncMentorNamesFromSupabase();}
+    async function enterApp(){document.getElementById("loginScreen").classList.add("hidden");document.getElementById("app").classList.remove("hidden");const displayName=currentUser.full_name||currentUser.username||"User",nameParts=displayName.trim().split(/\s+/),initials=nameParts.slice(0,2).map(part=>part[0]||"").join("").toUpperCase();document.getElementById("userName").textContent=displayName;document.getElementById("userRole").textContent=String(currentUser.role||"Mentor").replace(/\b\w/g,letter=>letter.toUpperCase());document.getElementById("userAvatar").textContent=initials||"F";document.getElementById("mentorOperatorsCaption").textContent="Your Operators — active operators assigned to your mentor account.";document.getElementById("adminButton").classList.toggle("hidden",String(currentUser.role||"").toLowerCase()!=="admin");applyRoleUI();await loadProjects();await loadCloud();renderAll();renderQC();renderTodayOntest();}
+    async function loadProjects(){try{projects=JSON.parse(localStorage.getItem("MW_PROJECTS_V2")||"{}");}catch{projects={};}if(!Object.keys(projects).length&&localStorage.getItem("MW_PROJECTS_V2_EMPTY")!=="1"){const old=await db.series_parts.toArray();old.forEach(r=>{const key=r.project_name||"Imported Project";(projects[key]??=[]).push({opId:String(r.op_id||""),name:r.full_name||"",seriesNo:String(r.series_number||""),startImg:r.start_img||"",endImg:r.end_img||"",disImg:+r.dis_img||0,tImg:+r.t_img||0,entry:numVal(r.entry_count),status:r.status||"Entry",mentorName:r.mentor_name||"Unassigned",comment:r.qc_reject_comment||""});});save();}const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;await syncMentorNamesFromSupabase();}
     async function syncMentorNamesFromSupabase(){if(!supabaseClient)return;const{data,error}=await supabaseClient.from("operators").select("op_id,mentor_name");if(error){console.error("Unable to load operator mentors from the cloud:",error);return;}const mentorByOpId=new Map();(data||[]).forEach(o=>{const opId=String(o.op_id||"").trim().toLowerCase(),mentorName=String(o.mentor_name||"").trim();if(opId&&mentorName)mentorByOpId.set(opId,mentorName);});let changed=false;Object.values(projects).forEach(rows=>rows.forEach(p=>{const mentorName=mentorByOpId.get(String(p.opId||"").trim().toLowerCase());if(mentorName&&p.mentorName!==mentorName){p.mentorName=mentorName;changed=true;}}));if(changed)save();}
     function save(){localStorage.setItem("MW_PROJECTS_V2",JSON.stringify(projects));if(Object.keys(projects).length)localStorage.removeItem("MW_PROJECTS_V2_EMPTY");else localStorage.setItem("MW_PROJECTS_V2_EMPTY","1");}
 
-    /* ===== mergeUpload: Default to 'add', sync Done silently ===== */
+    /* ===== Helper: Accurately checks if a part belongs to the currently logged in mentor ===== */
+    function mentorMatchesCurrentUser(value){
+      if(!value || !currentUser) return false;
+      const mentor = norm(value);
+      const names = [currentUser.full_name, currentUser.username].filter(Boolean).map(norm);
+      return names.some(name => mentor === name || (name.length > 2 && mentor.includes(name)) || (mentor.length > 2 && name.includes(mentor)));
+    }
+
+    /* ===== mergeUpload: Default to 'add', sync Done silently with today stamp ===== */
     function mergeUpload(existingRows, rows, mode="add"){
       const normVal = v => String(v || "").trim().toLowerCase();
       const find = np => {
@@ -118,6 +305,8 @@
       };
       let out = [...existingRows];
       let added = 0;
+      const todayIso = getTodayIso();
+      const curUser = currentUser?.full_name || currentUser?.username || "Excel";
       if(mode === "add"){
         let doneSync = 0;
         rows.forEach(np => {
@@ -127,7 +316,10 @@
             added++;
           } else if(norm(np.status) === "done" && norm(e.status) !== "done"){
             e.status = "Done";
-            if(np.distDate) e.distDate = np.distDate;
+            if(np.distDate) e.distDate = np.distDate; else if(!e.distDate) e.distDate = todayIso;
+            e.doneDate = todayIso;
+            e.doneTime = new Date().toLocaleTimeString();
+            e.doneBy = curUser;
             doneSync++;
           }
         });
@@ -145,7 +337,13 @@
             if(!p.comment) p.comment = e.comment || "";
             if(norm(e.status) === "done") p.status = "Done";
           }
-          if(norm(np.status) === "done") p.status = "Done";
+          if(norm(np.status) === "done"){
+            p.status = "Done";
+            if(!p.distDate) p.distDate = todayIso;
+            p.doneDate = todayIso;
+            p.doneTime = new Date().toLocaleTimeString();
+            p.doneBy = curUser;
+          }
           out.push(p);
         });
         return {
@@ -156,7 +354,6 @@
       }
     }
 
-    /* ===== Local Hidden Projects Manager (Stops 5-second auto-restore) ===== */
     const HIDDEN_K = "MW_HIDDEN_PROJECTS_V1";
     function getHiddenProjects() {
       try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_K) || "[]")); } catch { return new Set(); }
@@ -170,7 +367,6 @@
       localStorage.removeItem(HIDDEN_K);
     }
 
-    /* ===== Delete Single Project (Deletes from user browser, updates draft) ===== */
     function deleteProject(){
       const name = project();
       if(!name) return showStatusPopup("No Project Selected", "Select a project to delete.");
@@ -194,6 +390,7 @@
           } catch(e) {}
           closeModal();
           loadProjects().then(renderAll);
+          renderTodayOntest();
           showStatusPopup("Project Deleted", `'${name}' removed from your browser.`);
         }
       );
@@ -202,7 +399,6 @@
       if(noBtn) noBtn.textContent = "No";
     }
 
-    /* ===== Delete All Projects: Fresh Start (Wipes projects, done parts & draft) ===== */
     function deleteAllProjectExcel() {
       const names = Object.keys(projects);
       if (!names.length) return showStatusPopup("No Projects", "There are no uploaded projects to delete.");
@@ -223,11 +419,9 @@
             hideShared(names);
           }
           
-          // 1. Wipe all local projects & work
           projects = {};
           save();
           
-          // 2. Completely wipe production draft and done parts memory
           productionRows = [];
           productionProjectKey = "";
           try {
@@ -243,6 +437,7 @@
           closeModal();
           renderAll();
           if (typeof renderQC === "function") renderQC();
+          renderTodayOntest();
 
           showStatusPopup("Fresh Start Ready", `All ${names.length} project(s), done parts, and production drafts have been wiped.`);
         }
@@ -253,12 +448,12 @@
       if(noBtn) noBtn.textContent = "No";
     }
 
-    function openRenameProject(){const oldName=project();if(!oldName)return showStatusPopup("No Project Selected","Select a project before renaming it.");openModal("Rename Project",`<label>Current project name</label><input value="${esc(oldName)}" disabled><label for="renamedProjectName">New project name</label><input id="renamedProjectName" value="${esc(oldName)}" required>`,async()=>{const newName=document.getElementById("renamedProjectName").value.trim();if(!newName)return showStatusPopup("Project Name Required","Enter a new project name.");if(newName!==oldName&&Object.prototype.hasOwnProperty.call(projects,newName))return showStatusPopup("Project Already Exists","Choose a name that is not already in use.");if(newName===oldName)return closeModal();const rows=projects[oldName];delete projects[oldName];projects[newName]=rows;productionRows=productionRows.map(row=>row.projectName===oldName?{...row,projectName:newName}:row);try{const drafts=JSON.parse(localStorage.getItem(productionDraftKey())||"[]").map(row=>row.projectName===oldName?{...row,projectName:newName}:row);localStorage.setItem(productionDraftKey(),JSON.stringify(drafts));}catch{}productionProjectKey=Object.keys(projects).join("\u001f");save();renameOnline(oldName,newName);const select=document.getElementById("projectSelect"),previous=select.value;select.innerHTML=Object.keys(projects).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");select.value=previous===oldName?newName:previous;closeModal();renderAll();let cloudMessage="Supabase history renamed.";try{const{error}=await supabaseClient.from("daily_production_summaries").update({project_name:newName}).eq("project_name",oldName);if(error)cloudMessage=`Local project renamed, but Supabase history was not changed: ${error.message}`;else await loadCloud();}catch(error){cloudMessage=`Local project renamed, but Supabase history could not be updated: ${error.message||"Cloud unavailable"}`;}showStatusPopup("Project Renamed",`${oldName} is now ${newName}. ${cloudMessage}`);});document.getElementById("modalSaveBtn").textContent="Rename Project";}
+    function openRenameProject(){const oldName=project();if(!oldName)return showStatusPopup("No Project Selected","Select a project before renaming it.");openModal("Rename Project",`<label>Current project name</label><input value="${esc(oldName)}" disabled><label for="renamedProjectName">New project name</label><input id="renamedProjectName" value="${esc(oldName)}" required>`,async()=>{const newName=document.getElementById("renamedProjectName").value.trim();if(!newName)return showStatusPopup("Project Name Required","Enter a new project name.");if(newName!==oldName&&Object.prototype.hasOwnProperty.call(projects,newName))return showStatusPopup("Project Already Exists","Choose a name that is not already in use.");if(newName===oldName)return closeModal();const rows=projects[oldName];delete projects[oldName];projects[newName]=rows;productionRows=productionRows.map(row=>row.projectName===oldName?{...row,projectName:newName}:row);try{const drafts=JSON.parse(localStorage.getItem(productionDraftKey())||"[]").map(row=>row.projectName===oldName?{...row,projectName:newName}:row);localStorage.setItem(productionDraftKey(),JSON.stringify(drafts));}catch{}productionProjectKey=Object.keys(projects).join("\u001f");save();renameOnline(oldName,newName);const select=document.getElementById("projectSelect"),previous=select.value;select.innerHTML=Object.keys(projects).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");select.value=previous===oldName?newName:previous;closeModal();renderAll();renderTodayOntest();let cloudMessage="Supabase history renamed.";try{const{error}=await supabaseClient.from("daily_production_summaries").update({project_name:newName}).eq("project_name",oldName);if(error)cloudMessage=`Local project renamed, but Supabase history was not changed: ${error.message}`;else await loadCloud();}catch(error){cloudMessage=`Local project renamed, but Supabase history could not be updated: ${error.message||"Cloud unavailable"}`;}showStatusPopup("Project Renamed",`${oldName} is now ${newName}. ${cloudMessage}`);});document.getElementById("modalSaveBtn").textContent="Rename Project";}
 
-    function mentorMatchesCurrentUser(value){const mentor=norm(value),names=[currentUser?.full_name,currentUser?.username].filter(Boolean).map(norm);return names.some(name=>mentor===name||name.length>2&&mentor.includes(name)||mentor.length>2&&name.includes(mentor));}
     function populateMentorFilters(){const filter=document.getElementById("activeMentorFilter");if(!filter)return;const previous=filter.value,names=[...new Set(Object.values(projects).flat().map(row=>String(row.mentorName||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));filter.innerHTML='<option value="">All Mentors</option>'+names.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");if(names.includes(previous))filter.value=previous;const statusFilter=document.getElementById("statusMentorFilter");if(statusFilter&&!statusFilter.dataset.initialized){statusFilter.value=String(currentUser?.role||"").toLowerCase().includes("admin")?"all":"mine";statusFilter.dataset.initialized="true";}}
     function filterActiveParts(){const mentor=document.getElementById("activeMentorFilter")?.value;document.querySelectorAll("#activeBody tr").forEach(row=>{row.hidden=Boolean(mentor&&row.cells[9]?.textContent!==mentor);});}
 
+    /* ===== MENTOR WORKSTATION: ACCURATE DONE & ENTRY CALCULATION ===== */
     function renderAll(){
       const rows=parts(),mentors={};
       rows.forEach(p=>{
@@ -270,9 +465,9 @@
         if(norm(p.status)==="entrycomplete")mentors[m].complete++;
       });
       document.getElementById("reportBody").innerHTML=Object.entries(mentors).map(([m,x],i)=>`<tr><td>${i+1}</td><td>${esc(m)}</td><td>${x.ops.size}</td><td>${x.entry}</td><td>${x.complete}</td><td>${x.series.size}</td><td>${x.entry+x.complete}</td></tr>`).join("");
-      document.getElementById("detailBody").innerHTML=rows.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${p.entry||0}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td>${esc(p.comment)}</td></tr>`).join("");
+      document.getElementById("detailBody").innerHTML=rows.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${numVal(p.entry)}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td>${esc(p.comment)}</td></tr>`).join("");
       
-      document.getElementById("activeBody").innerHTML=rows.map((p,i)=>({p,i})).filter(({p})=>["entry","entrycomplete","running"].includes(norm(p.status))).map(({p,i})=>`<tr><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${esc(p.startImg)}</td><td>${esc(p.endImg)}</td><td>${p.tImg||0}</td><td>${p.entry||0}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td></tr>`).join("");
+      document.getElementById("activeBody").innerHTML=rows.map((p,i)=>({p,i})).filter(({p})=>["entry","entrycomplete","running"].includes(norm(p.status))).map(({p,i})=>`<tr><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${esc(p.startImg)}</td><td>${esc(p.endImg)}</td><td>${p.tImg||0}</td><td>${numVal(p.entry)}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td></tr>`).join("");
       
       renderSeries(rows);
       
@@ -281,17 +476,45 @@
         if(["entry","entrycomplete"].includes(norm(p.status)))seriesRemaining[p.seriesNo]=(seriesRemaining[p.seriesNo]||0)+1;
       });
 
-      const isMineOnly=document.getElementById("statusMentorFilter")?.value==="mine";
+      const isMineOnly = document.getElementById("statusMentorFilter")?.value === "mine";
 
+      // 1. Status Manager Table
       document.getElementById("statusBody").innerHTML=rows.map((p,i)=>({p,i}))
         .filter(({p})=>["entry","entrycomplete","running","reject"].includes(norm(p.status)))
-        .filter(({p})=>!isMineOnly||mentorMatchesCurrentUser(p.mentorName))
-        .map(({p,i})=>`<tr><td><input type="checkbox" class="part-check" value="${i}"></td><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${p.entry||0}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td>${seriesRemaining[p.seriesNo]||0}</td><td>${esc(p.comment)}</td></tr>`).join("");
+        .filter(({p})=>!isMineOnly || mentorMatchesCurrentUser(p.mentorName))
+        .map(({p,i})=>`<tr><td><input type="checkbox" class="part-check" value="${i}"></td><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${numVal(p.entry)}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td>${seriesRemaining[p.seriesNo]||0}</td><td>${esc(p.comment)}</td></tr>`).join("");
 
-      document.getElementById("doneBody").innerHTML=rows.map((p,i)=>({p,i}))
-        .filter(({p})=>norm(p.status)==="done")
-        .filter(({p})=>!isMineOnly||mentorMatchesCurrentUser(p.mentorName))
-        .map(({p,i})=>`<tr><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${p.entry||0}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td><button type="button" class="amber" onclick="revertDonePart(${i})">Revert</button></td></tr>`).join("");
+      // 2. Mentor Live Status Metrics on Status View toolbar
+      const myAllParts = rows.filter(p => mentorMatchesCurrentUser(p.mentorName));
+      const myDoneParts = myAllParts.filter(p => norm(p.status) === "done");
+      const myPendingParts = myAllParts.filter(p => ["entry","entrycomplete","running","reject"].includes(norm(p.status)));
+      const myDoneEntrySum = myDoneParts.reduce((s, p) => s + numVal(p.entry), 0);
+
+      const mDonePartsEl = document.getElementById("statusMyDoneParts");
+      if(mDonePartsEl) mDonePartsEl.textContent = `My Done Parts: ${myDoneParts.length}`;
+      const mDoneEntryEl = document.getElementById("statusMyDoneEntry");
+      if(mDoneEntryEl) mDoneEntryEl.textContent = `My Done Entry: ${myDoneEntrySum}`;
+      const mPendPartsEl = document.getElementById("statusMyPendingParts");
+      if(mPendPartsEl) mPendPartsEl.textContent = `My Pending Parts: ${myPendingParts.length}`;
+
+      // 3. Done Parts List View inside Mentor Workstation
+      const doneDateFilter = document.getElementById("doneTabDateFilter")?.value || "today";
+      const todayIso = getTodayIso();
+      const myDoneFiltered = myDoneParts.filter(p => {
+        if(doneDateFilter === "today"){
+          return (p.doneDate === todayIso) || (String(p.distDate||"").slice(0,10) === todayIso);
+        }
+        return true;
+      });
+
+      const doneTabCountEl = document.getElementById("doneTabCountMetric");
+      if(doneTabCountEl) doneTabCountEl.textContent = `My Done Parts: ${myDoneFiltered.length}`;
+      const doneTabEntryEl = document.getElementById("doneTabEntryMetric");
+      if(doneTabEntryEl) doneTabEntryEl.textContent = `My Total Entry: ${myDoneFiltered.reduce((s,p)=>s+numVal(p.entry),0)}`;
+
+      document.getElementById("doneBody").innerHTML=myDoneFiltered.length 
+        ? myDoneFiltered.map(p=>`<tr><td>${esc(p.opId)}</td><td>${esc(p.name)}</td><td>${esc(p.seriesNo)}</td><td>${numVal(p.entry)}</td><td>${esc(p.status)}</td><td>${esc(p.distDate||"")}</td><td>${esc(p.mentorName)}</td><td><button type="button" class="amber" onclick="revertSpecificPart('${esc(p.opId)}','${esc(p.seriesNo)}')">Revert</button></td></tr>`).join("")
+        : `<tr><td colspan="8" style="text-align:center;color:#64748b;padding:12px">No done parts found for the selected filter.</td></tr>`;
 
       const ops={};
       rows.forEach(p=>{
@@ -303,20 +526,73 @@
       populateMentorFilters();
       filterActiveParts();
       renderProduction();
+      renderTodayOntest();
     }
 
-    function renderSeries(rows){const map={};rows.forEach(p=>{map[p.seriesNo]??={entry:0,img:p.tImg||0,left:[]};map[p.seriesNo].entry+=+p.entry||0;if(norm(p.status)!=="done")map[p.seriesNo].left.push(p.mentorName);});const list=Object.entries(map),ready=list.filter(([,x])=>!x.left.length).length;document.getElementById("totalMetric").textContent=`Total Series: ${list.length}`;document.getElementById("readyMetric").textContent=`Ready: ${ready}`;document.getElementById("pendingMetric").textContent=`Pending: ${list.length-ready}`;document.getElementById("seriesBody").innerHTML=list.map(([s,x])=>`<tr><td>${esc(s)}</td><td>${x.entry}</td><td>${x.img}</td><td>${x.left.length?"Pending":"Ready for Process"}</td><td>${esc(x.left.join(", ")||"-")}</td></tr>`).join("");}
+    function renderSeries(rows){const map={};rows.forEach(p=>{map[p.seriesNo]??={entry:0,img:p.tImg||0,left:[]};map[p.seriesNo].entry+=numVal(p.entry);if(norm(p.status)!=="done")map[p.seriesNo].left.push(p.mentorName);});const list=Object.entries(map),ready=list.filter(([,x])=>!x.left.length).length;document.getElementById("totalMetric").textContent=`Total Series: ${list.length}`;document.getElementById("readyMetric").textContent=`Ready: ${ready}`;document.getElementById("pendingMetric").textContent=`Pending: ${list.length-ready}`;document.getElementById("seriesBody").innerHTML=list.map(([s,x])=>`<tr><td>${esc(s)}</td><td>${x.entry}</td><td>${x.img}</td><td>${x.left.length?"Pending":"Ready for Process"}</td><td>${esc(x.left.join(", ")||"-")}</td></tr>`).join("");}
     function showStatusPopup(title,message){openModal(title,`<p>${esc(message)}</p>`,closeModal);document.getElementById("modalSaveBtn").textContent="Close";}
     function selectAll(el){document.querySelectorAll(".part-check").forEach(x=>x.checked=el.checked);}
     function selected(){return[...document.querySelectorAll(".part-check:checked")].map(x=>+x.value);}
-    function updateSelected(status){const ids=selected();if(!ids.length)return showStatusPopup("No Parts Selected","Select at least one part first.");const applyStatus=comment=>{ids.forEach(i=>{const part=parts()[i];if(part){part.status=status;if(comment)part.comment=comment;}});save();closeModal();renderAll();};if(status==="Reject"){openModal("Reject Parts",'<label for="rejectComment">Rejection comment</label><textarea id="rejectComment" rows="4" style="width:100%;resize:vertical" placeholder="Enter the reason for rejection"></textarea>',()=>applyStatus(document.getElementById("rejectComment").value.trim()||"Reject"));document.getElementById("modalSaveBtn").textContent="Reject Selected";return;}applyStatus("");}
-    function deleteSelected(){const ids=new Set(selected());if(!ids.size)return showStatusPopup("No Parts Selected","Select at least one part first.");projects[project()]=parts().filter((_,index)=>!ids.has(index));save();renderAll();}
+
+    /* ===== UPDATE SELECTED (STAMPS DONE WITH DATE, TIME & MENTOR) ===== */
+    function updateSelected(status){
+      const ids=selected();
+      if(!ids.length)return showStatusPopup("No Parts Selected","Select at least one part first.");
+      const todayIso = getTodayIso();
+      const nowTime = new Date().toLocaleTimeString();
+      const curUser = currentUser?.full_name || currentUser?.username || "Mentor";
+
+      const applyStatus=comment=>{
+        ids.forEach(i=>{
+          const part=parts()[i];
+          if(part){
+            part.status=status;
+            if(comment)part.comment=comment;
+            if(status==="Done"){
+              part.distDate = todayIso;
+              part.doneDate = todayIso;
+              part.doneTime = nowTime;
+              part.doneBy = curUser;
+              if(!part.mentorName || part.mentorName==="Unassigned"){
+                part.mentorName = curUser;
+              }
+            }
+          }
+        });
+        save();
+        closeModal();
+        renderAll();
+        renderTodayOntest();
+      };
+      if(status==="Reject"){
+        openModal("Reject Parts",'<label for="rejectComment">Rejection comment</label><textarea id="rejectComment" rows="4" style="width:100%;resize:vertical" placeholder="Enter the reason for rejection"></textarea>',()=>applyStatus(document.getElementById("rejectComment").value.trim()||"Reject"));
+        document.getElementById("modalSaveBtn").textContent="Reject Selected";
+        return;
+      }
+      applyStatus("");
+    }
+
+    function deleteSelected(){const ids=new Set(selected());if(!ids.size)return showStatusPopup("No Parts Selected","Select at least one part first.");projects[project()]=parts().filter((_,index)=>!ids.has(index));save();renderAll();renderTodayOntest();}
     function renderProduction(){const count=parts().filter(p=>norm(p.status)==="done").reduce((n,p)=>n+(+p.disImg||1),0);document.getElementById("productionBody").innerHTML=project()?`<tr><td>${esc(project())}</td><td>${esc(currentUser.full_name||currentUser.username)}</td><td><input id="productionCount" type="number" value="0" min="0"></td><td><input id="ontestCount" type="number" value="${count}" min="0"></td></tr>`:"";}
     async function submitProduction(){const{error}=await supabaseClient.from("daily_production_summaries").insert({mentor_name:currentUser.full_name||currentUser.username,project_name:project(),work_date:document.getElementById("workDate").value,production_count:+document.getElementById("productionCount")?.value||0,done_parts_count:+document.getElementById("ontestCount")?.value||0,comments:document.getElementById("workComment").value});if(error)return alert(String(error.message).replace(/supabase/gi,"cloud service"));alert("Production submitted to the cloud.");await loadCloud();}
     async function loadCloud(){if(!supabaseClient)return;const{data,error}=await supabaseClient.from("daily_production_summaries").select("mentor_name,project_name,work_date,production_count,done_parts_count,comments").order("work_date",{ascending:false}).limit(500),body=document.getElementById("monthlyBody");if(error){body.innerHTML=`<tr><td colspan="6">${esc(error.message)}</td></tr>`;return;}const rows=data||[];rows.sort((a,b)=>{const dateA=parseSummaryDate(a.work_date),dateB=parseSummaryDate(b.work_date);return(dateB?new Date(dateB.year,dateB.month-1,dateB.day).getTime():0)-(dateA?new Date(dateA.year,dateA.month-1,dateA.day).getTime():0);});body.innerHTML=rows.map(x=>`<tr><td>${esc(x.mentor_name)}</td><td>${esc(x.project_name)}</td><td>${esc(x.work_date)}</td><td>${x.production_count||0}</td><td>${x.done_parts_count||0}</td><td>${esc(x.comments)}</td></tr>`).join("")||`<tr><td colspan="6">No Supabase submission data found.</td></tr>`;drawCharts(rows);}
     function parseSummaryDate(value){const raw=String(value||"").trim(),iso=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(raw),named=/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(raw),months=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];let year,month,day;if(iso){year=+iso[1];month=+iso[2];day=+iso[3];}else if(named){year=+named[3];month=months.indexOf(named[2].toLowerCase())+1;day=+named[1];}else return null;if(month<1||month>12||day<1||day>new Date(year,month,0).getDate())return null;return{year,month,day};}
     function drawCharts(rows){for(const[id,field,old]of[["productionChart","production_count",productionChart],["ontestChart","done_parts_count",ontestChart]]){old?.destroy();const sums={};rows.forEach(r=>sums[r.mentor_name||"Unknown"]=(sums[r.mentor_name||"Unknown"]||0)+(+r[field]||0));const chart=new Chart(document.getElementById(id),{type:"doughnut",data:{labels:Object.keys(sums),datasets:[{data:Object.values(sums),backgroundColor:["#218c5a","#1769aa","#a66a2c","#bd3b3b","#506d83"]}]},options:{responsive:true,maintainAspectRatio:false}});if(id==="productionChart")productionChart=chart;else ontestChart=chart;}}
-    function showTab(id,button){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");button.classList.add("active");if(id==="admin"){loadAdminUsers();loadOperators();}if(id==="summary")loadMonthlyPivot();if(id==="qcws"){renderQC();qcLoadInf();}}function toggleReport(id){document.getElementById("reportSummary").classList.toggle("hidden",id!=="reportSummary");document.getElementById("reportDetails").classList.toggle("hidden",id!=="reportDetails");}function showMentorView(id){["operatorsView","statusView","productionView","doneView"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));if(id==="productionView")renderProduction();if(id==="operatorsView")loadMentorOperators();}function logout(){sessionStorage.removeItem("faah_current_user");location.reload();}
+    
+    function showTab(id,button){
+      document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      button.classList.add("active");
+      if(id==="admin"){loadAdminUsers();loadOperators();}
+      if(id==="summary")loadMonthlyPivot();
+      if(id==="qcws"){renderQC();qcLoadInf();}
+      if(id==="todayOntest")renderTodayOntest();
+    }
+    
+    function toggleReport(id){document.getElementById("reportSummary").classList.toggle("hidden",id!=="reportSummary");document.getElementById("reportDetails").classList.toggle("hidden",id!=="reportDetails");}
+    function showMentorView(id){["operatorsView","statusView","productionView","doneView"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));if(id==="productionView")renderProduction();if(id==="operatorsView")loadMentorOperators();}
+    function logout(){sessionStorage.removeItem("faah_current_user");location.reload();}
 
     function showSummaryView(id){["pivotView","historyView"].forEach(view=>document.getElementById(view).classList.toggle("hidden",view!==id));}
     let pivotExportData=[],pivotExportLabel="",summaryPeriodInitialized=false;
@@ -336,9 +612,54 @@
     function filterSeriesList(){renderSeries(parts());}
     function clearSeriesFilter(){document.getElementById("seriesFilterInput").value="";renderSeries(parts());}
     function productionDraftKey(){return`MW_PRODUCTION_SUMMARY_${norm(currentUser?.username||currentUser?.full_name||"user")}`;}
-    function doneEntryCount(projectName){return(projects[projectName]||[]).filter(row=>norm(row.status)==="done").reduce((total,row)=>total+(+row.entry||0),0);}
-    function donePartsCount(projectName){return(projects[projectName]||[]).filter(row=>norm(row.status)==="done").length;}
-    renderProduction=function(reset=false){const names=Object.keys(projects),key=names.join("\u001f");if(reset||productionProjectKey!==key){let saved=[];try{saved=JSON.parse(localStorage.getItem(productionDraftKey())||"[]");}catch{}const prior=new Map(saved.map(row=>[row.projectName,row]));productionRows=names.map(name=>prior.get(name)||{projectName:name,workDate:document.getElementById("workDate").value,productionCount:0,ontestCount:doneEntryCount(name),comment:document.getElementById("workComment").value,ontestManual:false});productionProjectKey=key;}productionRows=productionRows.map(row=>{const manual=reset?false:Boolean(row.ontestManual);return{...row,ontestManual:manual,ontestCount:manual?row.ontestCount:doneEntryCount(row.projectName)};});const mentor=currentUser?.full_name||currentUser?.username||"",table=document.querySelector("#productionView table");if(table&&!table.querySelector("thead [data-copy-column]")){const copyHeader=document.createElement("th");copyHeader.dataset.copyColumn="true";copyHeader.innerHTML='<button type="button" class="blue" onclick="copySelectedProductionRows()">Copy</button>';table.tHead.rows[0].append(copyHeader);}document.getElementById("productionBody").innerHTML=productionRows.map((row,index)=>`<tr><td>${esc(mentor)}</td><td><select aria-label="Project for row ${index+1}" onchange="updateProductionRow(${index},'projectName',this.value)">${names.map(name=>`<option value="${esc(name)}" ${name===row.projectName?"selected":""}>${esc(name)}</option>`).join("")}${!names.includes(row.projectName)&&row.projectName?`<option selected value="${esc(row.projectName)}">${esc(row.projectName)}</option>`:""}</select></td><td><input type="date" value="${esc(row.workDate)}" onchange="updateProductionRow(${index},'workDate',this.value)"></td><td><input type="number" min="0" value="${+row.productionCount||0}" onchange="updateProductionRow(${index},'productionCount',this.value)"></td><td><input type="number" min="0" value="${+row.ontestCount||0}" onchange="updateProductionRow(${index},'ontestCount',this.value)"></td><td><input value="${esc(row.comment)}" onchange="updateProductionRow(${index},'comment',this.value)"></td><td><input type="checkbox" class="production-row-check" aria-label="Select production row ${index+1}" onchange="syncProductionSelection()"></td></tr>`).join("")||'<tr><td colspan="7">Upload a project Excel file to start a production summary.</td></tr>';syncProductionSelection();updateProductionTotal();};
+    
+    function doneEntryCount(projectName){
+      return (projects[projectName]||[])
+        .filter(row=>norm(row.status)==="done"&&mentorMatchesCurrentUser(row.mentorName))
+        .reduce((total,row)=>total+numVal(row.entry),0);
+    }
+    function donePartsCount(projectName){
+      return (projects[projectName]||[])
+        .filter(row=>norm(row.status)==="done"&&mentorMatchesCurrentUser(row.mentorName))
+        .length;
+    }
+
+    renderProduction=function(reset=false){
+      const names=Object.keys(projects),key=names.join("\u001f");
+      if(reset||productionProjectKey!==key){
+        let saved=[];
+        try{saved=JSON.parse(localStorage.getItem(productionDraftKey())||"[]");}catch{}
+        const prior=new Map(saved.map(row=>[row.projectName,row]));
+        productionRows=names.map(name=>prior.get(name)||{
+          projectName:name,
+          workDate:document.getElementById("workDate").value,
+          productionCount:0,
+          ontestCount:doneEntryCount(name),
+          comment:document.getElementById("workComment").value,
+          ontestManual:false
+        });
+        productionProjectKey=key;
+      }
+      productionRows=productionRows.map(row=>{
+        const manual=reset?false:Boolean(row.ontestManual);
+        return{
+          ...row,
+          ontestManual:manual,
+          ontestCount:manual?row.ontestCount:doneEntryCount(row.projectName)
+        };
+      });
+      const mentor=currentUser?.full_name||currentUser?.username||"",table=document.querySelector("#productionView table");
+      if(table&&!table.querySelector("thead [data-copy-column]")){
+        const copyHeader=document.createElement("th");
+        copyHeader.dataset.copyColumn="true";
+        copyHeader.innerHTML='<button type="button" class="blue" onclick="copySelectedProductionRows()">Copy</button>';
+        table.tHead.rows[0].append(copyHeader);
+      }
+      document.getElementById("productionBody").innerHTML=productionRows.map((row,index)=>`<tr><td>${esc(mentor)}</td><td><select aria-label="Project for row ${index+1}" onchange="updateProductionRow(${index},'projectName',this.value)">${names.map(name=>`<option value="${esc(name)}" ${name===row.projectName?"selected":""}>${esc(name)}</option>`).join("")}${!names.includes(row.projectName)&&row.projectName?`<option selected value="${esc(row.projectName)}">${esc(row.projectName)}</option>`:""}</select></td><td><input type="date" value="${esc(row.workDate)}" onchange="updateProductionRow(${index},'workDate',this.value)"></td><td><input type="number" min="0" value="${+row.productionCount||0}" onchange="updateProductionRow(${index},'productionCount',this.value)"></td><td><input type="number" min="0" value="${+row.ontestCount||0}" onchange="updateProductionRow(${index},'ontestCount',this.value)"></td><td><input value="${esc(row.comment)}" onchange="updateProductionRow(${index},'comment',this.value)"></td><td><input type="checkbox" class="production-row-check" aria-label="Select production row ${index+1}" onchange="syncProductionSelection()"></td></tr>`).join("")||'<tr><td colspan="7">Upload a project Excel file to start a production summary.</td></tr>';
+      syncProductionSelection();
+      updateProductionTotal();
+    };
+
     function updateProductionRow(index,key,value){const row=productionRows[index];if(!row)return;row[key]=key==="productionCount"||key==="ontestCount"?Math.max(0,+value||0):value;if(key==="ontestCount")row.ontestManual=true;if(key==="projectName"){row.ontestCount=doneEntryCount(value);row.ontestManual=false;}updateProductionTotal();}
     function updateProductionTotal(){const total=productionRows.reduce((sum,row)=>sum+(+row.ontestCount||0),0);document.getElementById("productionTotal").textContent=`Total Ontest Data Count (All Projects): ${total}`;}
     function applyProductionDefaults(){const date=document.getElementById("workDate").value,comment=document.getElementById("workComment").value;productionRows.forEach(row=>{row.workDate=date;row.comment=comment;});renderProduction();}
@@ -351,6 +672,43 @@
 
     function saveProductionSummary(){localStorage.setItem(productionDraftKey(),JSON.stringify(productionRows));alert("Production summary saved on this device.");}
     function viewSavedSummary(){showTab("summary",document.querySelector(".tab-btn[onclick*=\"showTab('summary'\"]"));showSummaryView("historyView");}
+    
+    function resetMyDailyProduction(){
+      openModal("Fresh Start for Today?",
+        `<p><b>Clear your production draft and start fresh today?</b></p>`+
+        `<p style="color:#64748b">This resets your personal Ontest and Production counts to 0.</p>`+
+        `<p><label><input type="checkbox" id="revertMyDoneCheck" checked> <b>Also reset my Done parts back to Running status</b></label></p>`+
+        `<p style="font-size:11px;color:#16a34a;">Only parts marked under your name (${esc(currentUser?.full_name || currentUser?.username)}) are affected. Other mentors' parts remain untouched.</p>`,
+        ()=>{
+          const revertDone = document.getElementById("revertMyDoneCheck")?.checked;
+          if(revertDone){
+            Object.values(projects).forEach(rows => {
+              rows.forEach(p => {
+                if(norm(p.status) === "done" && mentorMatchesCurrentUser(p.mentorName)){
+                  p.status = "Running";
+                  delete p.doneDate;
+                  delete p.doneTime;
+                  delete p.doneBy;
+                }
+              });
+            });
+            save();
+          }
+          productionRows = [];
+          productionProjectKey = "";
+          try { localStorage.removeItem(productionDraftKey()); } catch(e){}
+          closeModal();
+          renderProduction(true);
+          renderAll();
+          renderTodayOntest();
+          showStatusPopup("Fresh Start Ready", "Your personal production summary has been reset for today.");
+        }
+      );
+      document.getElementById("modalSaveBtn").textContent = "Yes, Reset";
+      const noBtn = document.querySelector("#modalOverlay .toolbar button:first-child");
+      if(noBtn) noBtn.textContent = "Cancel";
+    }
+
     submitProduction=async function(){const records=productionRows.filter(row=>String(row.projectName||"").trim()).map(row=>({mentor_name:currentUser.full_name||currentUser.username,project_name:row.projectName,work_date:row.workDate||document.getElementById("workDate").value,production_count:+row.productionCount||0,done_parts_count:donePartsCount(row.projectName),sum_entry_count:+row.ontestCount||0,comments:row.comment??document.getElementById("workComment").value}));if(!records.length)return alert("Add at least one project row before submitting.");const{error}=await supabaseClient.from("daily_production_summaries").insert(records);if(error)return alert(error.message);localStorage.removeItem(productionDraftKey());alert(`${records.length} project production row${records.length===1?"":"s"} submitted to Supabase.`);await loadCloud();};
 
     /* ===== Upload Excel: 'add' is default, keeps existing parts intact ===== */
@@ -386,7 +744,7 @@
                 const value=field=>columns[field]>=0?String(record[columns[field]]??"").trim():"",seriesNo=value("seriesNo"),opId=value("opId");
                 if(!seriesNo||/^(total|grand total|subtotal)\b/i.test(seriesNo))return;
                 const number=field=>{const parsed=Number(value(field).replace(/,/g,""));return Number.isFinite(parsed)?parsed:0;};
-                rows.push({opId,name:value("name"),seriesNo,startImg:value("startImg"),endImg:value("endImg"),disImg:number("disImg"),tImg:number("tImg"),entry:number("entry"),status:value("status")||"Entry",mentorName:value("mentorName")||"Unassigned",comment:value("comment"),distDate:fmtDistDate(columns.distDate>=0?record[columns.distDate]:"")});
+                rows.push({opId,name:value("name"),seriesNo,startImg:value("startImg"),endImg:value("endImg"),disImg:number("disImg"),tImg:number("tImg"),entry:numVal(value("entry")),status:value("status")||"Entry",mentorName:value("mentorName")||"Unassigned",comment:value("comment"),distDate:fmtDistDate(columns.distDate>=0?record[columns.distDate]:"")});
               });
             });
             if(!rows.length)throw Error("No series-based rows found. Add a Series, Series No, or Series Number column with data below its header row.");
@@ -522,6 +880,271 @@
       $sum("summaryDateClear").addEventListener("click",()=>{clearSummaryDates();apply();});
     }
 
+    /* =========================================================================
+       TODAY ONTEST: Complete Filter Engine & Live Breakdown Tracker
+       ========================================================================= */
+    function toggleOntestDateMode(){
+      const mode = document.getElementById("ontestDateScope")?.value;
+      const inp = document.getElementById("ontestDateInput");
+      if(inp){
+        inp.style.display = (mode === "custom") ? "inline-block" : "none";
+        if(mode === "today") inp.value = getTodayIso();
+      }
+      renderTodayOntest();
+    }
+
+    function showOntestView(id, btn){
+      ["ontestProjectView","ontestMentorView","ontestDetailView"].forEach(x => {
+        const el = document.getElementById(x);
+        if(el) el.classList.toggle("hidden", x !== id);
+      });
+      document.querySelectorAll("#ontestSubtabs button").forEach(b => b.classList.remove("active"));
+      if(btn) btn.classList.add("active");
+    }
+
+    function getTodayOntestList(){
+      const dateScope = document.getElementById("ontestDateScope")?.value || "today";
+      const customDate = document.getElementById("ontestDateInput")?.value || getTodayIso();
+      const projFilter = document.getElementById("ontestProjScope")?.value || "";
+      const mentorScope = document.getElementById("ontestMentorScope")?.value || "";
+      const minEntry = numVal(document.getElementById("ontestEntryMinFilter")?.value || 0);
+      const minParts = numVal(document.getElementById("ontestPartsMinFilter")?.value || 0);
+      const todayIso = getTodayIso();
+
+      const list = [];
+      Object.entries(projects).forEach(([pName, pRows]) => {
+        if(projFilter && pName !== projFilter) return;
+
+        (pRows || []).forEach((p, idx) => {
+          if(norm(p.status) === "done"){
+            // Mentor scope
+            if(mentorScope === "mine" && !mentorMatchesCurrentUser(p.mentorName)) return;
+            if(mentorScope && mentorScope !== "mine" && norm(p.mentorName) !== norm(mentorScope)) return;
+
+            // Entry count filter
+            const entryCnt = numVal(p.entry);
+            if(entryCnt < minEntry) return;
+
+            // Date evaluation
+            let matchDate = true;
+            const pDate = p.doneDate || (p.distDate ? String(p.distDate).slice(0, 10) : "");
+            if(dateScope === "today"){
+              matchDate = (pDate === todayIso) || (!pDate);
+            } else if(dateScope === "custom"){
+              matchDate = (pDate === customDate);
+            }
+
+            if(matchDate){
+              list.push({ ...p, projectName: pName, originalIndex: idx, entryNumeric: entryCnt });
+            }
+          }
+        });
+      });
+
+      // Filter by min parts count if requested
+      if(minParts > 0){
+        const projCounts = {};
+        list.forEach(p => { projCounts[p.projectName] = (projCounts[p.projectName] || 0) + 1; });
+        return list.filter(p => (projCounts[p.projectName] || 0) >= minParts);
+      }
+
+      return list;
+    }
+
+    let todayOntestCache = [];
+    function renderTodayOntest(){
+      const list = getTodayOntestList();
+      todayOntestCache = list;
+
+      const totalParts = list.length;
+      const totalEntry = list.reduce((sum, p) => sum + p.entryNumeric, 0);
+
+      // Populate Project & Mentor Scope Dropdowns once
+      const projSel = document.getElementById("ontestProjScope");
+      if(projSel && projSel.options.length <= 1){
+        const projs = Object.keys(projects).sort();
+        projs.forEach(pn => {
+          const opt = document.createElement("option");
+          opt.value = opt.textContent = pn;
+          projSel.appendChild(opt);
+        });
+      }
+
+      const mentorSel = document.getElementById("ontestMentorScope");
+      if(mentorSel && mentorSel.options.length <= 2){
+        const allMentors = [...new Set(Object.values(projects).flat().map(r => String(r.mentorName||"").trim()).filter(Boolean))].sort();
+        allMentors.forEach(m => {
+          const opt = document.createElement("option");
+          opt.value = opt.textContent = m;
+          mentorSel.appendChild(opt);
+        });
+      }
+
+      // Metric Badges at top of Today OnTest Tab
+      const partsTotalEl = document.getElementById("todayOntestPartsTotal");
+      if(partsTotalEl) partsTotalEl.textContent = `Done Parts: ${totalParts}`;
+      const entryTotalEl = document.getElementById("todayOntestEntryTotal");
+      if(entryTotalEl) entryTotalEl.textContent = `Total Entry: ${totalEntry}`;
+
+      // 1. Project-wise Summary Table
+      const projMap = {};
+      list.forEach(p => {
+        const pn = p.projectName || "Unassigned";
+        projMap[pn] = projMap[pn] || { name: pn, mentors: new Set(), partsCount: 0, totalEntry: 0 };
+        projMap[pn].partsCount++;
+        projMap[pn].totalEntry += p.entryNumeric;
+        if(p.mentorName && p.mentorName !== "Unassigned") projMap[pn].mentors.add(p.mentorName);
+      });
+
+      const projRows = Object.values(projMap).sort((a,b) => b.totalEntry - a.totalEntry);
+      document.getElementById("ontestProjectBody").innerHTML = projRows.length ? projRows.map((pr, idx) => {
+        const avg = pr.partsCount > 0 ? (pr.totalEntry / pr.partsCount).toFixed(1) : 0;
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><b>${esc(pr.name)}</b></td>
+            <td>${esc([...pr.mentors].join(", ") || "-")}</td>
+            <td style="font-weight:700;color:var(--green)">${pr.partsCount}</td>
+            <td style="font-weight:700;color:#b45309">${pr.totalEntry}</td>
+            <td style="color:#506d83">${avg}</td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="6" style="text-align:center;color:#64748b;padding:14px">No parts marked Done matching current filters.</td></tr>`;
+
+      document.getElementById("ontestProjectFoot").innerHTML = projRows.length ? `
+        <tr style="background:#fff6d8;font-weight:700">
+          <td colspan="3" style="text-align:right">Total (All Projects):</td>
+          <td style="color:var(--green)">${totalParts}</td>
+          <td style="color:#b45309">${totalEntry}</td>
+          <td>${totalParts > 0 ? (totalEntry/totalParts).toFixed(1) : 0}</td>
+        </tr>
+      ` : "";
+
+      // 2. Mentor-wise Summary Table
+      const mentorMap = {};
+      list.forEach(p => {
+        const m = p.mentorName || "Unassigned";
+        mentorMap[m] = mentorMap[m] || { name: m, projects: new Set(), partsCount: 0, totalEntry: 0 };
+        mentorMap[m].partsCount++;
+        mentorMap[m].totalEntry += p.entryNumeric;
+        if(p.projectName) mentorMap[m].projects.add(p.projectName);
+      });
+
+      const mentorRows = Object.values(mentorMap).sort((a,b) => b.totalEntry - a.totalEntry);
+      document.getElementById("ontestMentorBody").innerHTML = mentorRows.length ? mentorRows.map((mr, idx) => {
+        const sharePct = totalEntry > 0 ? ((mr.totalEntry / totalEntry) * 100).toFixed(1) + "%" : "0%";
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><b>${esc(mr.name)}</b></td>
+            <td>${esc([...mr.projects].join(", ") || "-")}</td>
+            <td style="font-weight:700;color:var(--green)">${mr.partsCount}</td>
+            <td style="font-weight:700;color:#b45309">${mr.totalEntry}</td>
+            <td>${sharePct}</td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="6" style="text-align:center;color:#64748b;padding:14px">No mentor activity recorded for this period.</td></tr>`;
+
+      document.getElementById("ontestMentorFoot").innerHTML = mentorRows.length ? `
+        <tr style="background:#e3f7ee;font-weight:700">
+          <td colspan="3" style="text-align:right">Total (All Mentors):</td>
+          <td style="color:var(--green)">${totalParts}</td>
+          <td style="color:#b45309">${totalEntry}</td>
+          <td>100%</td>
+        </tr>
+      ` : "";
+
+      filterTodayOntestDetails();
+    }
+
+    function filterTodayOntestDetails(){
+      const q = (document.getElementById("ontestDetailSearch")?.value || "").trim().toLowerCase();
+      const filtered = todayOntestCache.filter(p => {
+        if(!q) return true;
+        const haystack = `${p.opId} ${p.name} ${p.seriesNo} ${p.projectName} ${p.mentorName} ${p.comment}`.toLowerCase();
+        return haystack.includes(q);
+      });
+
+      const countInfo = document.getElementById("ontestDetailCountInfo");
+      if(countInfo) countInfo.textContent = `Showing ${filtered.length} parts (Total Entry: ${filtered.reduce((s,p)=>s+p.entryNumeric,0)})`;
+
+      document.getElementById("ontestDetailBody").innerHTML = filtered.length ? filtered.map((p, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><b>${esc(p.projectName)}</b></td>
+          <td>${esc(p.opId)}</td>
+          <td>${esc(p.name)}</td>
+          <td>${esc(p.seriesNo)}</td>
+          <td style="font-weight:700;color:#b45309">${p.entryNumeric}</td>
+          <td>${esc(p.distDate || "")}</td>
+          <td>${esc(p.doneTime || "-")}</td>
+          <td>${esc(p.mentorName)}</td>
+          <td>${esc(p.doneBy || p.mentorName)}</td>
+          <td>${esc(p.comment || "")}</td>
+          <td><button class="amber" style="padding:3px 7px" onclick="revertSpecificPart('${esc(p.opId)}','${esc(p.seriesNo)}')">Revert</button></td>
+        </tr>
+      `).join("") : `<tr><td colspan="12" style="text-align:center;color:#64748b;padding:14px">No parts found matching search.</td></tr>`;
+    }
+
+    function revertSpecificPart(opId, seriesNo){
+      let found = false;
+      Object.entries(projects).forEach(([pName, pRows]) => {
+        (pRows || []).forEach(p => {
+          if(String(p.opId).trim() === String(opId).trim() && String(p.seriesNo).trim() === String(seriesNo).trim()){
+            if(confirm(`Revert Op.ID ${p.opId} (Series ${p.seriesNo}) back to Running?`)){
+              p.status = "Running";
+              delete p.doneDate;
+              delete p.doneTime;
+              delete p.doneBy;
+              found = true;
+            }
+          }
+        });
+      });
+      if(found){
+        save();
+        renderAll();
+        renderTodayOntest();
+      }
+    }
+
+    function exportTodayOntestToExcel(){
+      const list = todayOntestCache;
+      if(!list.length) return alert(`No OnTest data to export.`);
+
+      const projMap = {};
+      list.forEach(p => {
+        const pn = p.projectName || "Unassigned";
+        projMap[pn] = projMap[pn] || { name: pn, mentors: new Set(), partsCount: 0, totalEntry: 0 };
+        projMap[pn].partsCount++;
+        projMap[pn].totalEntry += p.entryNumeric;
+        if(p.mentorName) projMap[pn].mentors.add(p.mentorName);
+      });
+      const projSheetData = [["#", "Project Name", "Mentors Active", "Done Parts Count", "Total Entry Count"]];
+      Object.values(projMap).forEach((pr, i) => projSheetData.push([i+1, pr.name, [...pr.mentors].join(", "), pr.partsCount, pr.totalEntry]));
+
+      const mentorMap = {};
+      list.forEach(p => {
+        const m = p.mentorName || "Unassigned";
+        mentorMap[m] = mentorMap[m] || { name: m, projects: new Set(), partsCount: 0, totalEntry: 0 };
+        mentorMap[m].partsCount++;
+        mentorMap[m].totalEntry += p.entryNumeric;
+        if(p.projectName) mentorMap[m].projects.add(p.projectName);
+      });
+      const mentorSheetData = [["#", "Mentor Name", "Projects Worked", "Done Parts Count", "Total Entry Count"]];
+      Object.values(mentorMap).forEach((mr, i) => mentorSheetData.push([i+1, mr.name, [...mr.projects].join(", "), mr.partsCount, mr.totalEntry]));
+
+      const detailsSheetData = [["#", "Project", "Op.ID", "Name", "Series", "Entry", "Dist Date", "Done Time", "Mentor", "Done By", "Comment"]];
+      list.forEach((p, i) => detailsSheetData.push([i+1, p.projectName, p.opId, p.name, p.seriesNo, p.entryNumeric, p.distDate||"", p.doneTime||"", p.mentorName, p.doneBy||"", p.comment||""]));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(projSheetData), "Project Summary");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mentorSheetData), "Mentor Summary");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detailsSheetData), "Done Parts Details");
+
+      XLSX.writeFile(wb, `OnTest_Summary_${getTodayIso()}.xlsx`);
+    }
+
     // ---------- Admin: generic modal ----------
     let modalSaveHandler=null;
     function openModal(title,bodyHtml,onSave){document.getElementById("modalTitle").textContent=String(title).replace(/supabase/gi,"cloud service");document.getElementById("modalBody").innerHTML=String(bodyHtml).replace(/supabase/gi,"cloud service");document.getElementById("modalSaveBtn").textContent="Save";modalSaveHandler=onSave;document.getElementById("modalOverlay").classList.remove("hidden");}
@@ -582,17 +1205,29 @@
 
     async function copyCheckedRows(containerId,button){const boxes=[...document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)];if(!boxes.length)return showStatusPopup("No Rows Selected","Select at least one row first (use the checkbox column).");const text=boxes.map(cb=>{const tr=cb.closest("tr");return[...tr.cells].slice(1).map(td=>td.querySelector("button")?"":td.textContent.replace(/\s+/g," ").trim()).join("\t");}).join("\n");const ok=await copyTextToClipboard(text);flashButtonLabel(button,ok?"Copied!":"Copy failed","Copy Selected Rows");}
 
-    function revertDonePart(i){const list=parts();const part=list[i];if(!part)return;if(!confirm(`Revert Op.ID ${part.opId} (Series ${part.seriesNo}) back to Running status?`))return;part.status="Running";save();renderAll();}
+    function revertDonePart(i){
+      const list=parts();
+      const part=list[i];
+      if(!part)return;
+      if(!confirm(`Revert Op.ID ${part.opId} (Series ${part.seriesNo}) back to Running status?`))return;
+      part.status="Running";
+      delete part.doneDate;
+      delete part.doneTime;
+      delete part.doneBy;
+      save();
+      renderAll();
+      renderTodayOntest();
+    }
 
     let readyFilterState=0,distDoneFilterState=0;
     function cycleReadyFilter(){readyFilterState=(readyFilterState+1)%3;const rb=document.getElementById("readyFilterBtn");rb.textContent=["Ready For Process: All","Ready For Process: Ready Only","Ready For Process: Not Ready"][readyFilterState];rb.className=readyFilterState?"green":"";renderAll();}
     function cycleDistDoneFilter(){distDoneFilterState=(distDoneFilterState+1)%3;const db2=document.getElementById("distDoneFilterBtn");db2.textContent=["Dist Done: All","Dist Done: Done Only","Dist Done: Not Done"][distDoneFilterState];db2.className=distDoneFilterState?"green":"";renderAll();}
 
-    renderSeries=function(rows){const grouped={};rows.forEach(row=>{const series=String(row.seriesNo||"");if(!series)return;grouped[series]??={entry:0,image:0,dist:0,remaining:{},parts:0};const item=grouped[series],statusKey=norm(row.status);item.entry+=+row.entry||0;item.image=Math.max(item.image,+row.tImg||0);item.dist+=+row.disImg||0;if(statusKey==="entry"||statusKey==="entrycomplete"){const mentor=row.mentorName||"Unassigned";item.remaining[mentor]=(item.remaining[mentor]||0)+1;item.parts++;}});const entries=Object.entries(grouped).sort(([a],[b])=>{const order=a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"});return seriesSortAscending?order:-order;}),ready=entries.filter(([,item])=>!item.parts).length;document.getElementById("totalMetric").textContent=`Total Series: ${entries.length}`;document.getElementById("readyMetric").textContent=`Ready for Process: ${ready}`;document.getElementById("pendingMetric").textContent=`Remaining Entry + EntryComplete: ${entries.length-ready}`;const filters=(document.getElementById("seriesFilterInput").value||"").split(/[\n,;\s]+/).map(v=>v.trim().toLowerCase()).filter(Boolean);let visible=filters.length?entries.filter(([series])=>filters.some(v=>series.toLowerCase().includes(v))):entries;if(readyFilterState===1)visible=visible.filter(([,item])=>!item.parts);else if(readyFilterState===2)visible=visible.filter(([,item])=>!!item.parts);if(distDoneFilterState===1)visible=visible.filter(([,item])=>item.image&&item.dist>=item.image);else if(distDoneFilterState===2)visible=visible.filter(([,item])=>!(item.image&&item.dist>=item.image));document.getElementById("seriesBody").innerHTML=visible.map(([series,item],index)=>{const remaining=Object.entries(item.remaining).map(([mentor,count])=>`${mentor} (${count})`).join(", ")||"-",processStatus=item.parts?String(item.parts):"Ready for Process",distStatus=item.image&&item.dist>=item.image?"Complete":"Pending";return`<tr><td>${index+1}</td><td>${esc(series)}</td><td>${item.entry}</td><td>${item.image}</td><td>${esc(processStatus)}</td><td>${distStatus}</td><td>${esc(remaining)}</td></tr>`;}).join("")||`<tr><td colspan="7">No series match this filter.</td></tr>`;};
+    renderSeries=function(rows){const grouped={};rows.forEach(row=>{const series=String(row.seriesNo||"");if(!series)return;grouped[series]??={entry:0,image:0,dist:0,remaining:{},parts:0};const item=grouped[series],statusKey=norm(row.status);item.entry+=numVal(row.entry);item.image=Math.max(item.image,+row.tImg||0);item.dist+=+row.disImg||0;if(statusKey==="entry"||statusKey==="entrycomplete"){const mentor=row.mentorName||"Unassigned";item.remaining[mentor]=(item.remaining[mentor]||0)+1;item.parts++;}});const entries=Object.entries(grouped).sort(([a],[b])=>{const order=a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"});return seriesSortAscending?order:-order;}),ready=entries.filter(([,item])=>!item.parts).length;document.getElementById("totalMetric").textContent=`Total Series: ${entries.length}`;document.getElementById("readyMetric").textContent=`Ready for Process: ${ready}`;document.getElementById("pendingMetric").textContent=`Remaining Entry + EntryComplete: ${entries.length-ready}`;const filters=(document.getElementById("seriesFilterInput").value||"").split(/[\n,;\s]+/).map(v=>v.trim().toLowerCase()).filter(Boolean);let visible=filters.length?entries.filter(([series])=>filters.some(v=>series.toLowerCase().includes(v))):entries;if(readyFilterState===1)visible=visible.filter(([,item])=>!item.parts);else if(readyFilterState===2)visible=visible.filter(([,item])=>!!item.parts);if(distDoneFilterState===1)visible=visible.filter(([,item])=>item.image&&item.dist>=item.image);else if(distDoneFilterState===2)visible=visible.filter(([,item])=>!(item.image&&item.dist>=item.image));document.getElementById("seriesBody").innerHTML=visible.map(([series,item],index)=>{const remaining=Object.entries(item.remaining).map(([mentor,count])=>`${mentor} (${count})`).join(", ")||"-",processStatus=item.parts?String(item.parts):"Ready for Process",distStatus=item.image&&item.dist>=item.image?"Complete":"Pending";return`<tr><td>${index+1}</td><td>${esc(series)}</td><td>${item.entry}</td><td>${item.image}</td><td>${esc(processStatus)}</td><td>${distStatus}</td><td>${esc(remaining)}</td></tr>`;}).join("")||`<tr><td colspan="7">No series match this filter.</td></tr>`;};
 
     showMentorView=function(id,btn){["operatorsView","statusView","productionView","doneView"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));document.querySelectorAll("#mentorSubtabs button").forEach(b=>b.classList.remove("active"));(btn||document.querySelector(`#mentorSubtabs button[onclick*="${id}"]`))?.classList.add("active");if(id==="productionView")renderProduction();if(id==="operatorsView")loadMentorOperators();};
 
-    function openAddPartModal(){if(!project())return alert("Select a project before adding a part.");const mentor=currentUser?.full_name||currentUser?.username||"";openModal("Add Part",`<label>Operator ID</label><input id="newPartOpId" required><label>Name</label><input id="newPartName"><label>Series Number</label><input id="newPartSeries" required><label>Entry Count</label><input id="newPartEntry" type="number" min="0" value="0"><label>Status</label><select id="newPartStatus"><option>Entry</option><option>EntryComplete</option><option>Running</option><option>Reject</option><option>OnTest</option><option>Sendback</option></select><label>Mentor</label><input id="newPartMentor" value="${esc(mentor)}"><label>Start Image</label><input id="newPartStartImage"><label>End Image</label><input id="newPartEndImage"><label>Distribution Image Count</label><input id="newPartDisImg" type="number" min="0" value="0"><label>Total Image Count</label><input id="newPartTImg" type="number" min="0" value="0"><label>Dist Date</label><input id="newPartDistDate" type="date"><label>Comment</label><input id="newPartComment">`,()=>{const opId=document.getElementById("newPartOpId").value.trim(),seriesNo=document.getElementById("newPartSeries").value.trim();if(!opId||!seriesNo)return alert("Operator ID and Series Number are required.");parts().push({opId,name:document.getElementById("newPartName").value.trim(),seriesNo,entry:+document.getElementById("newPartEntry").value||0,status:document.getElementById("newPartStatus").value,mentorName:document.getElementById("newPartMentor").value.trim()||mentor,startImg:document.getElementById("newPartStartImage").value.trim(),endImg:document.getElementById("newPartEndImage").value.trim(),disImg:+document.getElementById("newPartDisImg").value||0,tImg:+document.getElementById("newPartTImg").value||0,distDate:document.getElementById("newPartDistDate").value||"",comment:document.getElementById("newPartComment").value.trim()});save();closeModal();renderAll();});}
+    function openAddPartModal(){if(!project())return alert("Select a project before adding a part.");const mentor=currentUser?.full_name||currentUser?.username||"";openModal("Add Part",`<label>Operator ID</label><input id="newPartOpId" required><label>Name</label><input id="newPartName"><label>Series Number</label><input id="newPartSeries" required><label>Entry Count</label><input id="newPartEntry" type="number" min="0" value="0"><label>Status</label><select id="newPartStatus"><option>Entry</option><option>EntryComplete</option><option>Running</option><option>Reject</option><option>OnTest</option><option>Sendback</option></select><label>Mentor</label><input id="newPartMentor" value="${esc(mentor)}"><label>Start Image</label><input id="newPartStartImage"><label>End Image</label><input id="newPartEndImage"><label>Distribution Image Count</label><input id="newPartDisImg" type="number" min="0" value="0"><label>Total Image Count</label><input id="newPartTImg" type="number" min="0" value="0"><label>Dist Date</label><input id="newPartDistDate" type="date"><label>Comment</label><input id="newPartComment">`,()=>{const opId=document.getElementById("newPartOpId").value.trim(),seriesNo=document.getElementById("newPartSeries").value.trim();if(!opId||!seriesNo)return alert("Operator ID and Series Number are required.");parts().push({opId,name:document.getElementById("newPartName").value.trim(),seriesNo,entry:numVal(document.getElementById("newPartEntry").value),status:document.getElementById("newPartStatus").value,mentorName:document.getElementById("newPartMentor").value.trim()||mentor,startImg:document.getElementById("newPartStartImage").value.trim(),endImg:document.getElementById("newPartEndImage").value.trim(),disImg:+document.getElementById("newPartDisImg").value||0,tImg:+document.getElementById("newPartTImg").value||0,distDate:document.getElementById("newPartDistDate").value||"",comment:document.getElementById("newPartComment").value.trim()});save();closeModal();renderAll();renderTodayOntest();});}
 
     let _sessionId=null,_sessionWatcher=null;
     async function registerSession(){try{_sessionId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+"-"+Math.random().toString(16).slice(2));const{data:existing}=await supabaseClient.from("system_users").select("active_session").ilike("username",currentUser.username).maybeSingle();if(existing&&existing.active_session){const proceed=confirm("This account looks like it is already signed in on another browser or device.\n\nContinue here and sign that other session out?");if(!proceed){sessionStorage.removeItem("faah_current_user");location.reload();return;}}await supabaseClient.from("system_users").update({active_session:_sessionId}).ilike("username",currentUser.username);sessionStorage.setItem("faah_session_id",_sessionId);if(_sessionWatcher)clearInterval(_sessionWatcher);_sessionWatcher=setInterval(async()=>{try{const{data}=await supabaseClient.from("system_users").select("active_session").ilike("username",currentUser.username).maybeSingle();if(data&&data.active_session&&data.active_session!==_sessionId){clearInterval(_sessionWatcher);alert("You were signed out because this account signed in on another browser.");sessionStorage.removeItem("faah_current_user");location.reload();}}catch(e){}},20000);}catch(err){console.warn("Single-browser session check is inactive (add an 'active_session' text column to the Supabase 'system_users' table to enable it).",err.message);}}
@@ -639,12 +1274,38 @@
         if(!field)return showToast("This column can't be edited");
         const box=td.parentElement.querySelector(".part-check"),part=box?parts()[+box.value]:null;if(!part)return;
         const old=part[field]??"",html=td.innerHTML;let input;
-        if(field==="status"){input=document.createElement("select");const opts=["Entry","EntryComplete","Running","Reject","Done","OnTest","Sendback"];if(old&&!opts.some(o=>o.toLowerCase()===String(old).toLowerCase()))opts.push(String(old));opts.forEach(o=>{const op=document.createElement("option");op.value=op.textContent=o;input.appendChild(op);});input.value=opts.find(o=>o.toLowerCase()===String(old).toLowerCase())||"Entry";}
-        else{input=document.createElement("input");if(field==="entry"){input.type="number";input.min="0";}else if(field==="distDate"&&(!old||/^\d{4}-\d{2}-\d{2}$/.test(old)))input.type="date";input.value=old;}
+        if(field==="status"){
+          input=document.createElement("select");
+          const opts=["Entry","EntryComplete","Running","Reject","Done","OnTest","Sendback"];
+          if(old&&!opts.some(o=>o.toLowerCase()===String(old).toLowerCase()))opts.push(String(old));
+          opts.forEach(o=>{const op=document.createElement("option");op.value=op.textContent=o;input.appendChild(op);});
+          input.value=opts.find(o=>o.toLowerCase()===String(old).toLowerCase())||"Entry";
+        }
+        else{
+          input=document.createElement("input");
+          if(field==="entry"){input.type="number";input.min="0";}
+          else if(field==="distDate"&&(!old||/^\d{4}-\d{2}-\d{2}$/.test(old)))input.type="date";
+          input.value=old;
+        }
         input.style.cssText="width:100%;min-width:110px;box-sizing:border-box";
         td.textContent="";td.appendChild(input);input.focus();if(input.select&&input.tagName==="INPUT"&&input.type!=="date"&&input.type!=="number")input.select();
         let finished=false;
-        const finish=commit=>{if(finished)return;finished=true;let v=field==="entry"?(+input.value||0):String(input.value).trim();if(commit&&v!==old){part[field]=v;save();renderAll();setTimeout(()=>{const g2=gridOf(table),rr=Math.max(0,Math.min(g2.length-1,r));if(!g2.length)return;sel={table,a:{r:rr,c},f:{r:rr,c}};render();},0);}else{td.innerHTML=html;}};
+        const finish=commit=>{
+          if(finished)return;finished=true;
+          let v=field==="entry"?(numVal(input.value)):String(input.value).trim();
+          if(commit&&v!==old){
+            part[field]=v;
+            if(field==="status" && v==="Done"){
+              const todayIso = getTodayIso();
+              part.distDate = part.distDate || todayIso;
+              part.doneDate = todayIso;
+              part.doneTime = new Date().toLocaleTimeString();
+              part.doneBy = currentUser?.full_name || currentUser?.username || "Mentor";
+            }
+            save();renderAll();renderTodayOntest();
+            setTimeout(()=>{const g2=gridOf(table),rr=Math.max(0,Math.min(g2.length-1,r));if(!g2.length)return;sel={table,a:{r:rr,c},f:{r:rr,c}};render();},0);
+          }else{td.innerHTML=html;}
+        };
         input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();finish(true);}else if(e.key==="Escape"){e.preventDefault();finish(false);}});
         input.addEventListener("blur",()=>finish(true));
         if(field==="status")input.addEventListener("change",()=>finish(true));
@@ -712,7 +1373,7 @@ const qcDone=()=>{try{return JSON.parse(localStorage.getItem("MW_QC_DONE_V1")||"
 const _closeModal=closeModal;closeModal=function(){_closeModal();const b=document.querySelector("#modalOverlay .modal-box");if(b)b.style.width="";};
 function applyRoleUI(){const r=roleKey(),q=r==="qc";document.getElementById("qcTabButton").classList.toggle("hidden",!QC_ROLES.includes(r));["active","series","mentor","summary"].forEach(t=>{const b=document.querySelector(`.tabs button[onclick*="showTab('${t}'"]`);if(b)b.classList.toggle("hidden",q)});const sb=document.querySelector('button[onclick="toggleReport(\'reportSummary\')"]');if(sb)sb.classList.toggle("hidden",q);if(q)toggleReport("reportDetails");}
 function qcView(id){["qcA","qcB","qcC"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));}
-function qcInfo(project,series){const rows=(projects[project]||[]).filter(p=>sameS(p.seriesNo,series));if(!rows.length)return null;const rej=rows.some(p=>norm(p.status)==="reject");return{rows,entry:rows.reduce((t,p)=>t+(+p.entry||0),0),img:rows.map(p=>p.tImg).find(v=>v)||0,status:rej?"Reject":"Ready for Process",comment:rej?(rows.map(p=>p.comment).find(c=>c&&String(c).trim())||""):""};}
+function qcInfo(project,series){const rows=(projects[project]||[]).filter(p=>sameS(p.seriesNo,series));if(!rows.length)return null;const rej=rows.some(p=>norm(p.status)==="reject");return{rows,entry:rows.reduce((t,p)=>t+numVal(p.entry),0),img:rows.map(p=>p.tImg).find(v=>v)||0,status:rej?"Reject":"Ready for Process",comment:rej?(rows.map(p=>p.comment).find(c=>c&&String(c).trim())||""):""};}
 function qcPick(tr,i,done){if(done)qcDoneSel=i;else qcSel=i;[...tr.parentNode.children].forEach(r=>r.classList.remove("selected-row"));tr.classList.add("selected-row");}
 function renderQC(){const bb=document.getElementById("qcBulkBody");if(!bb)return;const head=document.getElementById("qcSumHead");if(!head.innerHTML){const h=["Card NO (INF-ID)","Date","Team","Type","Comments"];for(let i=1;i<=10;i++)h.push("Project"+i);for(let i=1;i<=10;i++)h.push("Data"+i);head.innerHTML="<tr>"+h.map(x=>`<th>${x}</th>`).join("")+"</tr>";}const dt=document.getElementById("qcDate");if(!dt.value)dt.value=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 bb.innerHTML=qcQueue.map((q,i)=>{const x=qcInfo(q.project,q.series)||{entry:0,img:0,status:"—",comment:""};return `<tr class="${i===qcSel?"selected-row":""}" onclick="qcPick(this,${i})" ondblclick="qcDetail(${i})"><td title="View detailed parts" style="text-align:center" onclick="event.stopPropagation();qcDetail(${i})">▶</td><td>${esc(q.project)}</td><td>${esc(q.series)}</td><td>${x.entry}</td><td>${x.img}</td><td>${esc(x.status)}</td><td>${esc(x.comment)}</td></tr>`}).join("")||'<tr><td colspan="7">No series loaded. Paste series numbers above.</td></tr>';
@@ -736,12 +1397,6 @@ function qcExport(){const rows=[...document.querySelectorAll("#qcSumTable tr")].
 <script>
 /* ===== Own submissions: view / edit / delete ===== */
 const isAdminUser=()=>roleKey()==="admin",isOwnRow=r=>{const m=norm(r.mentor_name);return !!m&&[currentUser?.full_name,currentUser?.username].filter(Boolean).map(norm).includes(m);},canEditRow=r=>isAdminUser()||isOwnRow(r);
-renderMonthlyHistory=function(){const body=document.getElementById("monthlyBody"),yEl=document.getElementById("historyYear");if(!body||!+yEl.value)return;const sel=document.getElementById("historyOwnFilter");if(!sel.dataset.init){sel.dataset.init="1";sel.value=isAdminUser()?"all":"mine";}
-const dated=monthlyHistoryRows.map(row=>({row,date:parseSummaryDate(row.work_date)})).filter(i=>i.date);
-if(!historyMonthInitialized){historyMonthInitialized=true;const m=+document.getElementById("historyMonth").value,y=+yEl.value;if(dated.length&&!dated.some(i=>i.date.year===y&&i.date.month===m)){const l=dated.reduce((a,b)=>new Date(a.date.year,a.date.month-1,a.date.day)>new Date(b.date.year,b.date.month-1,b.date.day)?a:b);document.getElementById("historyMonth").value=l.date.month;yEl.value=l.date.year;}}
-const mo=+document.getElementById("historyMonth").value,yr=+yEl.value,monthRows=dated.filter(i=>i.date.month===mo&&i.date.year===yr).map(i=>i.row),shown=sel.value==="mine"?monthRows.filter(isOwnRow):monthRows;
-body.innerHTML=shown.map(r=>`<tr><td>${esc(r.mentor_name)}</td><td>${esc(r.project_name)}</td><td>${esc(r.work_date)}</td><td>${+r.production_count||0}</td><td>${+r.sum_entry_count||0}</td><td>${esc(r.comments)}</td><td>${r.id!=null&&canEditRow(r)?`<button class="blue" onclick="editSubmission('${esc(r.id)}')">Edit</button> <button class="red" onclick="deleteSubmission('${esc(r.id)}')">Delete</button>`:""}</td></tr>`).join("")||`<tr><td colspan="7">${sel.value==="mine"?"You have no submissions for this month.":"No submissions for this month."}</td></tr>`;
-document.getElementById("historyTotals").textContent=`${shown.length} submission(s) · Production ${shown.reduce((t,r)=>t+(+r.production_count||0),0)} · Ontest ${shown.reduce((t,r)=>t+(+r.sum_entry_count||0),0)}`;drawCharts(monthRows);};
 const findSub=id=>monthlyHistoryRows.find(r=>String(r.id)===String(id));
 function editSubmission(id){const r=findSub(id);if(!r||!canEditRow(r))return showStatusPopup("Not Allowed","You can only edit your own submissions.");const iso=/^\d{4}-\d{2}-\d{2}$/.test(String(r.work_date||"").slice(0,10))?String(r.work_date).slice(0,10):"";
 openModal("Edit Submission",`<p><b>Mentor:</b> ${esc(r.mentor_name)}<br><b>Project:</b> ${esc(r.project_name)}</p>${iso?`<label>Date</label><input id="subDate" type="date" value="${iso}">`:`<p><b>Date:</b> ${esc(r.work_date)}</p>`}<label>Production Count</label><input id="subProd" type="number" min="0" value="${+r.production_count||0}"><label>Ontest Data Count</label><input id="subOntest" type="number" min="0" value="${+r.sum_entry_count||0}"><label>Comments</label><input id="subComm" value="${esc(r.comments||"")}">`,async()=>{const patch={production_count:+document.getElementById("subProd").value||0,sum_entry_count:+document.getElementById("subOntest").value||0,comments:document.getElementById("subComm").value.trim()};const d=document.getElementById("subDate");if(d&&d.value)patch.work_date=d.value;
@@ -794,8 +1449,13 @@ async function pushNames(names){const by=currentUser.full_name||currentUser.user
 function schedulePush(ms){if(!syncOn())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushDirty(),ms||1200);}
 async function pushDirty(){if(!syncOn())return;if(pushBusy){pushAgain=true;return;}pushBusy=true;const by=currentUser.full_name||currentUser.username;try{for(const name of Object.keys(projects)){const d=diffProject(name);if(!d||!d.dirty)continue;setSyncLabel("saving");try{const r=await pcFetch("/projects/"+enc(name),{method:"PATCH",body:JSON.stringify({upserts:d.upserts,deletes:d.deletes,base_version:getStamps()[name]||"",epoch:getEpochs()[name]||"",updated_by:by})});syncBase[name]=d.snap;saveBase();if(r.merged){if(await pullProject(name,true))renderPending=true;}else setStamp(name,r.version);}catch(e){if(e.code==="HTTP409"){await pullProject(name);renderPending=true;}else if(e.code==="HTTP404")forget(name);else throw e;}}await pushKv();setSyncLabel("live");}catch(e){setSyncLabel("offline");}finally{pushBusy=false;if(pushAgain){pushAgain=false;schedulePush(300);}if(renderPending)refreshUi();}}
 
-/* --- drafts + QC list of the logged-in user (follow them to another browser) */
-const kvUser=()=>norm(currentUser?.username||currentUser?.full_name||"user"),kvMap=()=>[["MW_PRODUCTION_SUMMARY_"+kvUser(),"draft:"+kvUser()],["MW_QC_DONE_V1","qc:"+kvUser()]];
+/* --- drafts + QC list of the logged-in user + today ontest log (follow to other browsers) */
+const kvUser=()=>norm(currentUser?.username||currentUser?.full_name||"user"),
+      kvMap=()=>[
+        ["MW_PRODUCTION_SUMMARY_"+kvUser(),"draft:"+kvUser()],
+        ["MW_QC_DONE_V1","qc:"+kvUser()],
+        ["MW_TODAY_ONTEST_LOG","qc:today_ontest"]
+      ];
 function kvUserGuard(){const u=kvUser(),lu=localStorage.getItem("MW_KV_USER");if(lu&&lu!==u)rawRem.call(localStorage,"MW_QC_DONE_V1");if(lu!==u)rawSet.call(localStorage,"MW_KV_USER",u);}
 async function pushKv(){if(!syncOn())return;kvUserGuard();const by=currentUser.full_name||currentUser.username;for(const[lk,sk]of kvMap()){const val=localStorage.getItem(lk),h=hstr(val==null?"":val),rec=kvSync[sk]||{};if(h===rec.h||(val==null&&!rec.v))continue;if(val==null){await pcFetch("/kv/"+enc(sk),{method:"DELETE"});kvSync[sk]={h,v:""};}else{const r=await pcFetch("/kv/"+enc(sk),{method:"PUT",body:JSON.stringify({value:val,updated_by:by})});kvSync[sk]={h,v:r.version};}saveKv();}}
 async function pollKv(kv){let applied=false;for(const[lk,sk]of kvMap()){const sv=kv&&kv[sk]?kv[sk].version:"",val=localStorage.getItem(lk),h=hstr(val==null?"":val),rec=kvSync[sk],dirty=!!rec&&h!==rec.h;if(sv){if((rec&&rec.v===sv)||dirty)continue;const it=await pcFetch("/kv/"+enc(sk));rawSet.call(localStorage,lk,it.value);kvSync[sk]={h:hstr(it.value),v:it.version};applied=true;}else if(rec&&rec.v&&!dirty){if(val!=null){rawRem.call(localStorage,lk);applied=true;}kvSync[sk]={h:hstr(""),v:""};}else if(val!=null&&!rec)await pushKv();}saveKv();if(applied)productionProjectKey=null;return applied;}
@@ -804,8 +1464,8 @@ Storage.prototype.setItem=function(k,v){rawSet.call(this,k,v);if(this===localSto
 Storage.prototype.removeItem=function(k){rawRem.call(this,k);if(this===localStorage&&isKvKey(k))schedKv();};
 const _saveLocal=save;save=function(){_saveLocal();schedulePush();};
 
-/* --- PC -> your screen (Respects hidden list so wiped projects do not auto-reappear) */
-async function refreshUi(){const ov=document.getElementById("modalOverlay"),ae=document.activeElement,typing=Date.now()-lastInput<4000&&ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);if((ov&&!ov.classList.contains("hidden"))||typing){renderPending=true;return;}renderPending=false;const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;try{renderAll();renderQC();}catch(e){console.error(e);}}
+/* --- PC -> your screen (checked every few seconds) */
+async function refreshUi(){const ov=document.getElementById("modalOverlay"),ae=document.activeElement,typing=Date.now()-lastInput<4000&&ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);if((ov&&!ov.classList.contains("hidden"))||typing){renderPending=true;return;}renderPending=false;const sel=document.getElementById("projectSelect"),old=sel.value;sel.innerHTML=Object.keys(projects).map(k=>`<option value="${esc(k)}">${esc(k)}</option>`).join("");if(old&&projects[old])sel.value=old;try{renderAll();renderQC();renderTodayOntest();}catch(e){console.error(e);}}
 async function pollState(){if(pollBusy||!syncOn())return;pollBusy=true;try{kvUserGuard();await pushDirty();const st=await pcFetch("/state?keys="+enc(kvMap().map(m=>m[1]).join(",")));const online=new Map(st.projects.map(o=>[o.project_name,o])),stamps=getStamps();const hidden=getHiddenProjects();let changed=false;
 for(const o of st.projects){const n=o.project_name;if(hidden.has(n))continue;if(!projects[n]){if(tombed(n))continue;if(await pullProject(n))changed=true;}else if(stamps[n]!==o.version){if(!syncBase[n]){if(await pullProject(n))changed=true;}else if(!isDirty(n)&&await pullProject(n,true))changed=true;}}
 for(const n of Object.keys(projects)){if(stamps[n]&&!online.has(n)&&!tombed(n)&&!isDirty(n)){delete projects[n];forget(n);changed=true;}}
@@ -816,7 +1476,7 @@ window.addEventListener("pagehide",()=>{try{const c=pcCfg();if(!syncOn())return;
 
 async function pushProjectsOnline(){const msg=document.getElementById("onlineMsg");if(!isAdminUser())return alert("Only an admin can send projects to the PC.");const names=Object.keys(projects);if(!names.length)return msg.textContent="No projects in this browser to send.";if(!confirm(`Send ${names.length} project(s) to the PC server? Projects with the same name on the PC server will be replaced.`))return;try{msg.textContent="Sending...";const n=await pushNames(names);msg.textContent=`${n} project(s) saved on the PC.`;loadOnlineProjects();}catch(e){msg.textContent=e.message;}}
 async function loadOnlineProjects(){const body=document.getElementById("onlineBody"),msg=document.getElementById("onlineMsg");if(!body)return;try{const list=await listOnline();body.innerHTML=list.map(o=>`<tr><td>${esc(o.project_name)}</td><td>${o.part_count||0}</td><td>${esc(o.updated_at||"—")}</td><td>${esc(o.updated_by||"—")}</td><td><button class="blue" onclick="pullOne('${enc(o.project_name)}')">Load here</button> <button class="red" onclick="deleteOnline('${enc(o.project_name)}')">Delete on PC</button></td></tr>`).join("")||'<tr><td colspan="5">No projects on the PC server yet.</td></tr>';msg.textContent="";}catch(e){body.innerHTML="";msg.textContent=e.message;}}
-async function pullOne(e){const n=decodeURIComponent(e);if(projects[n]&&!confirm(`Replace your local copy of '${n}' with the PC version?`))return;try{await pullProject(n);save();await loadProjects();renderAll();document.getElementById("onlineMsg").textContent=`'${n}' loaded.`;}catch(er){alert(er.message||er);}}
+async function pullOne(e){const n=decodeURIComponent(e);if(projects[n]&&!confirm(`Replace your local copy of '${n}' with the PC version?`))return;try{await pullProject(n);save();await loadProjects();renderAll();renderTodayOntest();document.getElementById("onlineMsg").textContent=`'${n}' loaded.`;}catch(er){alert(er.message||er);}}
 async function deleteOnline(e){const n=decodeURIComponent(e);if(!isAdminUser())return alert("Only an admin can delete projects on the PC.");if(!confirm(`Delete '${n}' from the PC server?\n\nUsers keep any copy already loaded in their browser.`))return;try{await pcFetch("/projects/"+enc(n),{method:"DELETE"});tomb.set(n,Date.now());forget(n);loadOnlineProjects();}catch(er){alert(er.message||er);}}
 const _showAdminView=showAdminView;showAdminView=function(id){_showAdminView(id);if(id==="localView")loadOnlineProjects();};
 const _enterApp=enterApp;enterApp=async function(){await _enterApp();document.getElementById("pcCfgBtn").classList.toggle("hidden",!isAdminUser());startLive();syncProjects(false);};
@@ -828,21 +1488,22 @@ function uploadChosenExcels(event){return event.target.files.length>1?uploadMult
 async function autoPushProject(name){if(!isAdminUser())return;let text,bad=false;try{await pushNames([name]);text="✔ Saved on your PC — other users get it at login or with Sync Projects.";}catch(e){bad=true;text="Saved in this browser, but NOT saved on the PC: "+(e.message||e);}
 for(let i=0;i<25;i++){const mt=document.getElementById("modalTitle"),mb=document.getElementById("modalBody");if(mt&&mt.textContent==="Parts Imported"&&mb&&mb.textContent.includes(name)){const p=document.createElement("p");p.textContent=text;p.style.fontWeight="600";p.style.color=bad?"#bd3b3b":"#218c5a";mb.append(p);return;}await new Promise(r=>setTimeout(r,200));}if(bad)alert(text);}
 async function removeOnline(names){names.forEach(n=>tomb.set(n,Date.now()));if(!isAdminUser()||!names.length||!pcCfg().url)return;for(const n of names){try{await pcFetch("/projects/"+enc(n),{method:"DELETE"});forget(n);}catch(e){alert(`Deleted here, but '${n}' could not be deleted on the PC: `+(e.message||e));return;}}}
-async function renameOnline(oldName,newName){tomb.set(oldName,Date.now());if(!isAdminUser()||!getStamps()[oldName])return;try{await pushNames([newName]);await pcFetch("/projects/"+enc(oldName),{method:"DELETE"});forget(oldName);}catch(e){alert("Renamed here, but the PC copy could not be renamed: "+(e.message||e));}}
+async function renameOnline(oldName,newName){tomb.set(oldName,Date.now());if(!isAdminUser()||!getStamps()[oldName])return;try{await pushNames([newName]);await pcFetch("/projects/"+oldName,{method:"DELETE"});forget(oldName);}catch(e){alert("Renamed here, but the PC copy could not be renamed: "+(e.message||e));}}
 </script>
+
 <script>
-/* ===== Per-user scoping: every user sees only their own Done parts, production summary and submissions ===== */
+/* ===== Per-user scoping: Done parts, production summary & workstation isolation ===== */
 const canSeeAllWork=()=>isAdminUser()||roleKey()==="teamleader",mineOnly=()=>!canSeeAllWork();
 
-/* Production Summary + Ontest counts: ONLY this user's done parts (never other mentors') */
-function doneEntryCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).reduce((t,r)=>t+(+r.entry||0),0);}
+/* Production Summary counts: strictly logged-in mentor's done parts */
+function doneEntryCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).reduce((t,r)=>t+numVal(r.entry),0);}
 function donePartsCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).length;}
 
-/* Status Manager + Done Parts List: normal users are locked to "My Mentor Work" */
+/* Status Manager + Done Parts List: normal users locked to "My Mentor Work" */
 const _renderAllScoped=renderAll;
 renderAll=function(){if(mineOnly()){const s=document.getElementById("statusMentorFilter");if(s)s.value="mine";}return _renderAllScoped.apply(this,arguments);};
 
-/* Mentor Summary tab (monthly summary, charts, submission list) is open to everyone: all mentors see all work */
+/* Mentor Summary tab is open to everyone */
 const _renderHistoryAll=renderMonthlyHistory;
 renderMonthlyHistory=function(){const s=document.getElementById("historyOwnFilter");if(s&&!s.dataset.init){s.dataset.init="1";s.value="all";}return _renderHistoryAll.apply(this,arguments);};
 
@@ -855,7 +1516,7 @@ function applyUserScopeUI(){
   });
 }
 const _enterAppScoped=enterApp;
-enterApp=async function(){await _enterAppScoped();applyUserScopeUI();renderAll();renderMonthlyHistory();};
+enterApp=async function(){await _enterAppScoped();applyUserScopeUI();renderAll();renderMonthlyHistory();renderTodayOntest();};
 </script>
 </body>
 </html>
