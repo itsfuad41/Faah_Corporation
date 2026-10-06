@@ -163,7 +163,7 @@
           </div>
           <div class="toolbar">
             <label for="statusMentorFilter">Show Parts</label>
-            <select id="statusMentorFilter" onchange="renderAll()"><option value="mine">My Mentor Work</option><option value="all">All Mentors</option></select>
+            <select id="statusMentorFilter" onchange="renderAll()"><option value="mine">My Mentor Work</option><option value="all">All Mentor Work</option></select>
             <button class="green" onclick="updateSelected('Done')">Mark Done</button>
             <button class="blue" onclick="updateSelected('Running')">Running</button>
             <button class="amber" onclick="updateSelected('Reject')">Reject</button>
@@ -1493,7 +1493,7 @@ async function renameOnline(oldName,newName){tomb.set(oldName,Date.now());if(!is
 
 <script>
 /* ===== Per-user scoping: Done parts, production summary & workstation isolation ===== */
-const canSeeAllWork=()=>isAdminUser()||roleKey()==="teamleader",mineOnly=()=>!canSeeAllWork();
+const canSeeAllWork=()=>true,mineOnly=()=>false;
 
 /* Production Summary counts: strictly logged-in mentor's done parts */
 function doneEntryCount(projectName){return(projects[projectName]||[]).filter(r=>norm(r.status)==="done"&&mentorMatchesCurrentUser(r.mentorName)).reduce((t,r)=>t+numVal(r.entry),0);}
@@ -1517,6 +1517,60 @@ function applyUserScopeUI(){
 }
 const _enterAppScoped=enterApp;
 enterApp=async function(){await _enterAppScoped();applyUserScopeUI();renderAll();renderMonthlyHistory();renderTodayOntest();};
+</script>
+<style>
+.qc-detail-wrap{overflow-x:hidden}
+.qc-detail-table{width:100%;table-layout:auto}
+.qc-detail-table th,.qc-detail-table td{white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding:6px 8px;font-size:12px}
+</style>
+<script>
+/* ===== Monthly Submission History: Edit / Delete buttons + own filter + totals ===== */
+renderMonthlyHistory=function(){
+  const body=document.getElementById("monthlyBody"),
+        month=+document.getElementById("historyMonth").value,
+        year=+document.getElementById("historyYear").value;
+  if(!year)return;
+  const dated=monthlyHistoryRows.map(row=>({row,date:parseSummaryDate(row.work_date)})).filter(i=>i.date);
+  if(!historyMonthInitialized){
+    historyMonthInitialized=true;
+    if(dated.length&&!dated.some(i=>i.date.year===year&&i.date.month===month)){
+      const latest=dated.reduce((a,b)=>new Date(a.date.year,a.date.month-1,a.date.day)>new Date(b.date.year,b.date.month-1,b.date.day)?a:b);
+      document.getElementById("historyMonth").value=latest.date.month;
+      document.getElementById("historyYear").value=latest.date.year;
+    }
+  }
+  const sm=+document.getElementById("historyMonth").value,sy=+document.getElementById("historyYear").value;
+  const monthRows=dated.filter(i=>i.date.month===sm&&i.date.year===sy).map(i=>i.row);
+  const mineOnlyView=document.getElementById("historyOwnFilter")?.value==="mine";
+  const rows=mineOnlyView?monthRows.filter(isOwnRow):monthRows;
+  const prod=rows.reduce((s,r)=>s+(+r.production_count||0),0),
+        ont=rows.reduce((s,r)=>s+(+r.sum_entry_count||0),0);
+  const totals=document.getElementById("historyTotals");
+  if(totals)totals.textContent=`${rows.length} submission(s) · Production ${prod} · Ontest ${ont}`;
+  body.innerHTML=rows.map(r=>`<tr>
+    <td>${esc(r.mentor_name)}</td><td>${esc(r.project_name)}</td><td>${esc(r.work_date)}</td>
+    <td>${+r.production_count||0}</td><td>${+r.sum_entry_count||0}</td><td>${esc(r.comments)}</td>
+    <td>${canEditRow(r)
+      ?`<button class="blue" style="padding:4px 10px" onclick="editSubmission('${esc(r.id)}')">Edit</button> <button class="red" style="padding:4px 10px" onclick="deleteSubmission('${esc(r.id)}')">Delete</button>`
+      :"-"}</td></tr>`).join("")||'<tr><td colspan="7">No submissions for this month.</td></tr>';
+  drawCharts(monthRows);
+};
+if(typeof monthlyHistoryRows!=="undefined"&&monthlyHistoryRows.length)renderMonthlyHistory();
+
+/* ===== QC Workstation: Detailed Parts popup fits the PC screen, no horizontal scrollbar ===== */
+qcDetail=function(i){
+  const q=qcQueue[i];if(!q)return;
+  const x=qcInfo(q.project,q.series);
+  if(!x)return showStatusPopup("No Data",`No detailed parts found for series '${q.series}'.`);
+  const cols=[["opId","Op.ID"],["name","Name"],["seriesNo","Series"],["startImg","Start Img"],["endImg","End Img"],["disImg","Dis:Img"],["tImg","T.Img"],["entry","Entry"],["status","Status"],["mentorName","Mentor"]];
+  openModal(`Detailed Parts — Series ${q.series}`,
+    `<div class="qc-detail-wrap"><table class="qc-detail-table"><thead><tr>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>${x.rows.map(p=>`<tr>${cols.map(c=>`<td>${esc(p[c[0]])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`,
+    closeModal);
+  document.getElementById("modalSaveBtn").textContent="Close";
+  const box=document.querySelector("#modalOverlay .modal-box");
+  box.style.width="min(1500px,96vw)";
+  box.style.maxWidth="96vw";
+};
 </script>
 </body>
 </html>
